@@ -1,11 +1,14 @@
-# 재고관리 - POST 추가 예정
+# 재고관리
 
 import streamlit as st
 import pandas as pd
 import requests
+import os
+from dotenv import load_dotenv
 
 # FastAPI URL
-API_URL = "http://127.0.0.1:8000"
+load_dotenv()
+API_URL = os.getenv("API_URL")
 
 # 한글 컬럼명으로 변환
 def translate_data(data):
@@ -44,7 +47,7 @@ def page4_view():
     data = get_inventory_data()
 
     if data:
-        df = translate_data(data)
+        df = translate_data(data).drop(columns=["account_idx"])
         st.dataframe(df)
 
 if __name__ == "__main__":

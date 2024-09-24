@@ -2,8 +2,10 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 import requests
+import os
+from dotenv import load_dotenv
 
-API_URL = "http://127.0.0.1:8000/production/latest"
+API_URL = ""
 def get_real_time_data():
     response = requests.get(API_URL)
     if response.status_code == 200:

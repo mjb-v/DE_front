@@ -3,8 +3,30 @@ import pandas as pd
 import plotly.express as px
 from datetime import datetime
 import requests
+import os
+from dotenv import load_dotenv
 
-API_URL = "http://127.0.0.1:8000/productions"
+load_dotenv()
+API_URL = os.getenv("API_URL")
+
+# 한글 컬럼명으로 변환
+def translate_data(data):
+    translation_dict = {
+        "date": "날짜",
+        "item_number": "품번",
+        "item_name": "품명",
+        "line": "라인",
+        "operator": "작업자",
+        "model": "모델",
+        "target_quantity": "목표수량",
+        "produced_quantity": "생산수량",
+        "production_efficiency": "생산효율",
+        "operating_time": "가동시간",
+        "non_operating_time": "비가동시간",
+        "equipment_efficiency": "설비효율"
+    }
+    return pd.DataFrame(data).rename(columns=translation_dict)
+
 def get_production_data(start_date, end_date, operator, part_number, part_name):
     params = {
         'start_date': start_date,
@@ -13,13 +35,14 @@ def get_production_data(start_date, end_date, operator, part_number, part_name):
         'part_number': part_number,
         'part_name': part_name
     }
-    response = requests.get(API_URL, params=params)
+    response = requests.get(f"{API_URL}/productions", params=params)
     if response.status_code == 200:
         return pd.DataFrame(response.json())
     else:
         st.error("백엔드에서 데이터를 가져오는 데 실패했습니다.")
         return pd.DataFrame()
 
+# ----------------------------------------------------------------
 def page2_view():
     st.title("생산실적 조회")
 

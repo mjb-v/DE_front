@@ -6,13 +6,16 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import requests
 from datetime import datetime
+import os
+from dotenv import load_dotenv
 
 font_path = 'NanumGothic-Regular.ttf'
 font_manager.fontManager.addfont(font_path)
 rc('font', family='NanumGothic')
 
 # FastAPI URL
-API_URL = "http://127.0.0.1:8000"
+load_dotenv()
+API_URL = os.getenv("API_URL")
 
 # 한글 컬럼명으로 변환
 def translate_data(data):
@@ -114,7 +117,7 @@ def page1_view():
     # 1. 생산 계획 조회 페이지
     if tab == "생산 계획 조회":
         st.subheader("생산 계획")
-        selected_year = st.selectbox("년도 선택", list(range(2014, 2025)))
+        selected_year = st.sidebar.selectbox("년도 선택", list(range(2014, 2025)))
         plan_data = get_all_plan(selected_year)
 
         if plan_data:
@@ -161,7 +164,6 @@ def page1_view():
 
         reg_data = get_plan_register()
         if not reg_data.empty:
-            st.subheader("생산 계획 등록 내역")
             st.dataframe(reg_data[['날짜', '품번', '품명', '모델', '수량', '단가']])
 
             # 수정/삭제할 행의 인덱스를 선택할 selectbox
