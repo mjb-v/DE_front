@@ -1,0 +1,7 @@
+# Anaconda 가상환경을 Git에서 제외
+bin/
+Lib/
+Scripts/
+include/
+conda-meta/
+.env
