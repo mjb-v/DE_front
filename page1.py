@@ -38,7 +38,7 @@ def translate_data(data):
 
 # GET 전체 생산 계획 리스트
 def get_all_plan(year: int):
-    url = f"{API_URL}/plans/{year}"
+    url = f"{API_URL}/plans/rate/{year}"
     response = requests.get(url)
     if response.status_code == 200:
         return response.json()
@@ -48,7 +48,7 @@ def get_all_plan(year: int):
 
 # GET 등록 페이지 테이블 데이터
 def get_plan_register():
-    response = requests.get(f"{API_URL}/plans/all")
+    response = requests.get(f"{API_URL}/plans/all/")
     if response.status_code == 200:
         data = response.json()
         df = translate_data(data)
@@ -67,7 +67,7 @@ def create_production_plan(data):
     response = requests.post(f"{API_URL}/plans/", json=data)
     if response.status_code == 200:
         st.success("생산 계획이 성공적으로 저장되었습니다!")
-        st.rerun()
+        st.session_state['refresh_table'] = True  # 테이블 새로고침
     else:
         st.error("생산 계획 저장에 실패했습니다.")
 
@@ -76,7 +76,7 @@ def update_production_plan(plan_id, data):
     response = requests.put(f"{API_URL}/plans/{plan_id}", json=data)
     if response.status_code == 200:
         st.success("생산 계획이 성공적으로 수정되었습니다!")
-        st.rerun()
+        st.session_state['refresh_table'] = True
     else:
         st.error("생산 계획 수정에 실패했습니다.")
 
@@ -85,7 +85,7 @@ def delete_production_plan(plan_id):
     response = requests.delete(f"{API_URL}/plans/{plan_id}")
     if response.status_code == 200:
         st.success("생산 계획이 성공적으로 삭제되었습니다!")
-        st.rerun()
+        st.session_state['refresh_table'] = True
     else:
         st.error("생산 계획 삭제에 실패했습니다.")
 
@@ -106,7 +106,6 @@ def production_plan_form(item_number="", item_name="", model="", year=2024, mont
     price = st.number_input("단가", min_value=0, value=price, key=f"price_{form_key}")
     
     return item_number, item_name, model, year, month, inventory, price
-
 
 # ------------------------------------------------------------------------------------
 
@@ -162,7 +161,15 @@ def page1_view():
     elif tab == "생산 계획 등록/수정":
         st.subheader("생산 계획 등록/수정")
 
-        reg_data = get_plan_register()
+        if 'refresh_table' not in st.session_state:
+            st.session_state['refresh_table'] = False
+
+        if st.session_state['refresh_table']:
+            reg_data = get_plan_register()  # 테이블 데이터 새로 가져옴
+            st.session_state['refresh_table'] = False  # 새로고침 후 플래그 초기화
+        else:
+            reg_data = st.session_state.get('reg_data', get_plan_register())  # 처음에는 데이터를 불러옴
+
         if not reg_data.empty:
             st.dataframe(reg_data[['날짜', '품번', '품명', '모델', '수량', '단가']])
 

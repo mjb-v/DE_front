@@ -34,7 +34,7 @@ def translate_data(data):
     return pd.DataFrame(data).rename(columns=translation_dict)
 
 def get_inventory_data():
-    url = f"{API_URL}/inventories/"
+    url = f"{API_URL}/inventories/all/"
     response = requests.get(url)
     if response.status_code == 200:
         return response.json()
