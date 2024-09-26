@@ -120,7 +120,6 @@ def page1_view():
 
     # 1. 생산 계획 조회 페이지
     if tab == "생산 계획 조회":
-        st.subheader("생산 계획")
         selected_year = st.sidebar.selectbox("년도 선택", list(range(2014, 2025)))
         df = get_all_plan(selected_year)
 
@@ -171,7 +170,7 @@ def page1_view():
             # 수정/삭제할 행의 인덱스를 선택할 selectbox # label_visibility='collapsed'
             col1, col2 = st.columns([2, 1])
             with col1:
-                selected_index = st.selectbox("수정/삭제할 행의 인덱스", reg_data.index, key="select_index")
+                selected_index = st.selectbox("수정/삭제할 행의 인덱스 선택", reg_data.index, key="select_index")
 
             with col2:
                 # 수정/삭제 버튼을 가깝게 배치

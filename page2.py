@@ -50,7 +50,7 @@ def page2_view():
     start_date = st.sidebar.date_input('시작 날짜', value=datetime(2024, 9, 1))
     end_date = st.sidebar.date_input('종료 날짜', value=datetime(2024, 9, 30))
     operator = st.sidebar.text_input('작업자 이름 입력')
-    item_number = st.sidebar.text_input('품번 입력', value=0)
+    item_number = st.sidebar.text_input('품번 입력')
     item_name = st.sidebar.text_input('품명 입력')
 
     if st.sidebar.button('검색'):
