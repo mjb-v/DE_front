@@ -159,8 +159,6 @@ def material_page1_view():
         st.pyplot(fig)
 
     elif tab == "자재 계획 등록":
-        st.subheader("자재 계획 등록/수정")
-
         # 전체 데이터 가져오기 및 테이블 표시
         df = get_plan_register()
         if not df.empty:
@@ -173,7 +171,7 @@ def material_page1_view():
         col1, col2 = st.columns([2, 1])
 
         with col1:
-            selected_index = st.selectbox("수정/삭제할 행의 인덱스 선택", df.index, key="select_index")
+            selected_index = st.selectbox("수정/삭제할 행의 번호 선택", df.index, key="select_index")
             
         with col2:
             selected_row = df.loc[selected_index]
@@ -189,8 +187,25 @@ def material_page1_view():
                 st.rerun()
 
         # 수정 입력 필드 표시
-        if st.session_state.get('is_editing', False):  # '수정' 버튼을 눌렀을 때만 나타남
-            st.subheader("수정 입력 필드")
+        if st.session_state.get('is_editing', False):  
+            # '수정 입력 필드' 텍스트에만 배경색 적용
+            st.markdown(
+                """
+                <style>
+                .edit-header {
+                    background-color: #f0f8ff;  /* 밝은 파란색 배경 */
+                    padding: 10px;
+                    border-radius: 5px;
+                    font-size: 1.5rem;
+                    font-weight: bold;
+                }
+                </style>
+                <div class="edit-header">수정 입력 필드</div>
+                """, 
+                unsafe_allow_html=True
+            )
+
+            # 입력 필드 섹션
             with st.form(key="update_form"):
                 client, item_number, item_name, item_category, model, selected_date, quantity, process = production_plan_form(
                     client=selected_row["거래처명"],
@@ -204,7 +219,6 @@ def material_page1_view():
                     form_key="update"
                 )
 
-                # 입력 필드는 넓게 배치되고, 저장 버튼도 입력 필드 아래에 표시
                 if st.form_submit_button("저장"):
                     update_data = {
                         "client": client,
@@ -217,12 +231,30 @@ def material_page1_view():
                         "process": process
                     }
                     update_production_plan(material_id, update_data)
-                    st.session_state['is_editing'] = False  # 수정 완료 후 상태 리셋
+                    st.session_state['is_editing'] = False
                     st.rerun()
 
-        st.subheader("새로운 계획 저장")
+        # 수평선으로 구분
+        st.markdown("---")
 
-        # 새 계획 등록을 위한 입력 필드
+        # '새로운 계획 저장' 텍스트에만 배경색 적용
+        st.markdown(
+            """
+            <style>
+            .create-header {
+                background-color: #e0ffe0;  /* 밝은 녹색 배경 */
+                padding: 10px;
+                border-radius: 5px;
+                font-size: 1.5rem;
+                font-weight: bold;
+            }
+            </style>
+            <div class="create-header">새로운 계획 저장</div>
+            """, 
+            unsafe_allow_html=True
+        )
+
+        # 새로운 계획 저장 필드
         with st.form(key="create_form"):
             client, item_number, item_name, item_category, model, selected_date, quantity, process = production_plan_form(form_key="create")
             if st.form_submit_button("저장"):
