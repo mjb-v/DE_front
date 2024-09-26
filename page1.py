@@ -176,10 +176,10 @@ def page1_view():
         if not reg_data.empty:
             st.dataframe(reg_data[['날짜', '품번', '품명', '모델', '수량', '단가']])
 
-            # 수정/삭제할 행의 인덱스를 선택할 selectbox
+            # 수정/삭제할 행의 인덱스를 선택할 selectbox #, label_visibility='collapsed'
             col1, col2 = st.columns([2, 1])
             with col1:
-                selected_index = st.selectbox("수정/삭제할 행의 인덱스", reg_data.index, key="select_index", label_visibility='collapsed')
+                selected_index = st.selectbox("수정/삭제할 행의 인덱스", reg_data.index, key="select_index")
 
             with col2:
                 # 수정/삭제 버튼을 가깝게 배치
