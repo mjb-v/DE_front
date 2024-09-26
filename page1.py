@@ -36,12 +36,14 @@ def translate_data(data):
     }
     return pd.DataFrame(data).rename(columns=translation_dict)
 
-# GET 전체 생산 계획 리스트
+# GET 전체 생산 계획 리스트 불러오기 및 가공
 def get_all_plan(year: int):
-    url = f"{API_URL}/plans/rate/{year}"
-    response = requests.get(url)
+    response = requests.get(f"{API_URL}/plans/rate/{year}")
     if response.status_code == 200:
-        return response.json()
+        data = response.json()
+        df = translate_data(data)
+        df = df.drop(columns=["년도"])
+        return df
     else:
         st.error("데이터를 불러오는 데 실패했습니다.")
         return None
@@ -97,7 +99,7 @@ def production_plan_form(item_number="", item_name="", model="가전", year=2024
     
     # 모델 선택을 selectbox로 수정
     model_options = ["가전", "건조기", "세탁기", "식기세척기", "에어컨", "중장비", "포장박스", "LX2PE", "GEN3.5", "MX5"]
-    model = st.selectbox("모델구분 선택", options=model_options, index=model_options.index(model), key=f"model_{form_key}")
+    model = st.selectbox("모델 선택", options=model_options, index=model_options.index(model), key=f"model_{form_key}")
     
     col1, col2 = st.columns([1, 1])
     with col1:
@@ -120,45 +122,35 @@ def page1_view():
     if tab == "생산 계획 조회":
         st.subheader("생산 계획")
         selected_year = st.sidebar.selectbox("년도 선택", list(range(2014, 2025)))
-        plan_data = get_all_plan(selected_year)
+        df = get_all_plan(selected_year)
 
-        if plan_data:
-            df = pd.DataFrame(plan_data)
-            df = translate_data(df)
-            df = df.drop(columns=["년도"])
+        # 테이블 형식으로 변환 (month를 columns로, 나머지를 index로 변환, row 순서 정렬)
+        df_pivot = df.set_index('월').T
+        df_pivot.columns = [f"{month}월" for month in df_pivot.columns]
+        row_order = ["사업계획", "사업실적", "사업달성율", "생산계획", "생산실적", "생산달성율"]
+        df_pivot = df_pivot.reindex(row_order)
 
-            # 테이블 형식으로 변환 (month를 columns로, 나머지를 index로 변환, row 순서 정렬)
-            df_pivot = df.set_index('월').T
-            df_pivot.columns = [f"{month}월" for month in df_pivot.columns]
-            row_order = ["사업계획", "사업실적", "사업달성율", "생산계획", "생산실적", "생산달성율"]
-            df_pivot = df_pivot.reindex(row_order)
+        # 테이블 출력
+        st.subheader(f"{selected_year}년도 계획 및 실적 데이터")
+        st.dataframe(df_pivot)
 
-            # 테이블 출력
-            st.subheader(f"{selected_year}년도 계획 및 실적 데이터")
-            st.dataframe(df_pivot)
+        # 그래프
+        st.subheader(f"{selected_year}년 차트")
+        business_achievement_rates = df["사업달성율"]
+        production_achievement_rates = df["생산달성율"]
+        months = df["월"].apply(lambda x: f"{x}월")
+        fig, ax = plt.subplots(figsize=(8, 6))
 
-            # 그래프
-            st.subheader(f"{selected_year}년 차트")
+        # 막대그래프에 월별 데이터 추가
+        ax.bar(months, business_achievement_rates, width=0.4, label='사업 달성률', align='center', color='#ff9999')
+        ax.bar(months, production_achievement_rates, width=0.4, label='생산 달성률', align='edge', color='#66b3ff')
 
-            # 월별로 사업 달성률과 생산 달성률 데이터 추출
-            business_achievement_rates = df["사업달성율"]
-            production_achievement_rates = df["생산달성율"]
-            months = df["월"].apply(lambda x: f"{x}월")
-
-            fig, ax = plt.subplots(figsize=(8, 6))
-
-            # 막대그래프에 월별 데이터 추가
-            ax.bar(months, business_achievement_rates, width=0.4, label='사업 달성률', align='center', color='#ff9999')
-            ax.bar(months, production_achievement_rates, width=0.4, label='생산 달성률', align='edge', color='#66b3ff')
-
-            # 그래프에 텍스트와 제목 추가
-            ax.set_ylim(0, 100)
-            ax.set_ylabel('달성률 (%)')
-            ax.set_title(f"{selected_year}년 월별 사업 및 생산 달성률")
-            ax.legend()
-            st.pyplot(fig)
-        else:
-            st.warning("계획 데이터가 없습니다.")
+        # 그래프에 텍스트와 제목 추가
+        ax.set_ylim(0, 100)
+        ax.set_ylabel('달성률 (%)')
+        ax.set_title(f"{selected_year}년 월별 사업 및 생산 달성률")
+        ax.legend()
+        st.pyplot(fig)
 
     # 2. 생산 계획 등록/수정 페이지
     elif tab == "생산 계획 등록/수정":
@@ -176,7 +168,7 @@ def page1_view():
         if not reg_data.empty:
             st.dataframe(reg_data[['날짜', '품번', '품명', '모델', '수량', '단가']])
 
-            # 수정/삭제할 행의 인덱스를 선택할 selectbox #, label_visibility='collapsed'
+            # 수정/삭제할 행의 인덱스를 선택할 selectbox # label_visibility='collapsed'
             col1, col2 = st.columns([2, 1])
             with col1:
                 selected_index = st.selectbox("수정/삭제할 행의 인덱스", reg_data.index, key="select_index")
