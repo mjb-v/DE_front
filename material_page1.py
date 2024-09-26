@@ -162,7 +162,6 @@ def material_page1_view():
         # 전체 데이터 가져오기 및 테이블 표시
         df = get_plan_register()
         if not df.empty:
-            # 'id'와 'account_idx' 열 제외하고 테이블 표시
             df_display = df.drop(columns=["id", "account_idx"])
             st.dataframe(df_display)
 
@@ -179,7 +178,7 @@ def material_page1_view():
 
             # 수정 버튼
             if st.button("수정", key="edit_button"):
-                st.session_state['is_editing'] = True  # '수정' 버튼을 눌렀을 때 상태 변경
+                st.session_state['is_editing'] = True
 
             # 삭제 버튼
             if st.button("삭제", key="delete_button"):
@@ -188,7 +187,6 @@ def material_page1_view():
 
         # 수정 입력 필드 표시
         if st.session_state.get('is_editing', False):  
-            # '수정 입력 필드' 텍스트에만 배경색 적용
             st.markdown(
                 """
                 <style>
@@ -233,11 +231,9 @@ def material_page1_view():
                     update_production_plan(material_id, update_data)
                     st.session_state['is_editing'] = False
                     st.rerun()
-
-        # 수평선으로 구분
         st.markdown("---")
 
-        # '새로운 계획 저장' 텍스트에만 배경색 적용
+        # '새로운 계획 저장'
         st.markdown(
             """
             <style>

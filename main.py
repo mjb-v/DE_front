@@ -39,31 +39,19 @@ company_info = companies[selected_company]
 st.sidebar.image(company_info['logo'], width=100)
 st.sidebar.write(f"상태: {company_info['connected']}")
 
-# 예쁜 탭 스타일링 적용 (radio 버튼 커스터마이징)
-st.markdown("""
-    <style>
-    div[role="radiogroup"] > label > div {
-        display: flex;
-        justify-content: center;
-        border: 1px solid #ddd;
-        padding: 10px;
-        cursor: pointer;
-        background-color: #f9f9f9;
-    }
-    div[role="radiogroup"] > label > div:hover {
-        background-color: #e6e6e6;
-    }
-    div[role="radiogroup"] > label > div:active {
-        background-color: #cccccc;
-    }
-    div[role="radiogroup"] > label > div:focus {
-        background-color: #e6e6e6;
-    }
-    </style>
-""", unsafe_allow_html=True)
+# 탭 선택 (수평 배치)
+if 'selected_tab' not in st.session_state:
+    st.session_state.selected_tab = "생산 관리"
 
-# 탭 선택
-selected_tab = st.radio("", ["생산 관리", "자재 관리"], index=0)
+# HTML로는 아무리해도 배치 적용이 안되므로 임의로 다중 컬럼 사용
+col1, col2, col3, col4, col5, col6, col7, col8, col9, col10 = st.columns(10)
+with col1:
+    if st.button("생산 관리"):
+        st.session_state.selected_tab = "생산 관리"
+with col2:
+    if st.button("자재 관리"):
+        st.session_state.selected_tab = "자재 관리"
+selected_tab = st.session_state.selected_tab
 
 # 선택된 탭에 따라 사이드바 메뉴 변경
 if selected_tab == "생산 관리":
