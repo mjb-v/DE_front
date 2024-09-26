@@ -89,12 +89,15 @@ def delete_production_plan(plan_id):
     else:
         st.error("생산 계획 삭제에 실패했습니다.")
 
-# 생산 계획 등록/수정용 입력 필드 함수
-def production_plan_form(item_number="", item_name="", model="", year=2024, month=1, inventory=0, price=0, form_key=""):
+# 생산계획 입력 필드
+def production_plan_form(item_number="", item_name="", model="가전", year=2024, month=1, inventory=0, price=0, form_key=""):
     # 각 입력 필드에 고유한 키 추가
     item_number = st.text_input("품번 입력", item_number, key=f"item_number_{form_key}")
     item_name = st.text_input("품명 입력", item_name, key=f"item_name_{form_key}")
-    model = st.text_input("모델 입력", model, key=f"model_{form_key}")
+    
+    # 모델 선택을 selectbox로 수정
+    model_options = ["가전", "건조기", "세탁기", "식기세척기", "에어컨", "중장비", "포장박스", "LX2PE", "GEN3.5", "MX5"]
+    model = st.selectbox("모델구분 선택", options=model_options, index=model_options.index(model), key=f"model_{form_key}")
     
     col1, col2 = st.columns([1, 1])
     with col1:

@@ -6,3 +6,4 @@ include/
 conda-meta/
 DE_B/
 .env
+get_companies_list.py

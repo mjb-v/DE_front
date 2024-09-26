@@ -35,7 +35,7 @@ def get_production_data(start_date, end_date, operator, item_number, item_name):
         'item_number': item_number,
         'item_name': item_name
     }
-    response = requests.get(f"{API_URL}/productions/day/{start_date}/{end_date}", params=params)
+    response = requests.get(f"{API_URL}/productions/days/", params=params)
     if response.status_code == 200:
         return translate_data(response.json())
     else:
