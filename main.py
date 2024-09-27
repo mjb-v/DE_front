@@ -22,53 +22,74 @@ companies = {
     "Company B": {"logo": "logo_b.png", "connected": "연결됨"}
 }
 
-# 기업 선택
+# 사이드바 커스텀 스타일
 st.sidebar.markdown("""
     <style>
-        .custom-title {
-            font-size: 30px;
-            margin-bottom: -55px;  /* 간격을 줄이기 위한 설정 */
+        .sidebar-section {
+            margin-bottom: 30px;
+        }
+        .sidebar-title {
+            font-size: 26px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        .sidebar-company-logo {
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+            width: 150px;
+            padding-bottom: 10px;
+        }
+        .sidebar-company-status {
+            font-size: 18px;
+            font-weight: 600;
+            color: #4CAF50;
+            text-align: left;
+        }
+        .sidebar-selectbox {
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+        .divider {
+            border-top: 2px solid #e6e6e6;
+            margin: 20px 0;
         }
     </style>
-    <h1 class='custom-title'>기업 선택</h1>
-    """, unsafe_allow_html=True)
-selected_company = st.sidebar.selectbox(" ", list(companies.keys()))
+""", unsafe_allow_html=True)
+
+# 기업 선택 섹션
+st.sidebar.markdown("<div class='sidebar-section sidebar-title'>기업 선택</div>", unsafe_allow_html=True)
+selected_company = st.sidebar.selectbox(" ", list(companies.keys()), label_visibility="collapsed")
 company_info = companies[selected_company]
 
-# 사이드바 상단에 회사명, 로고, 연결 상태 표시
-st.sidebar.image(company_info['logo'], width=100)
-st.sidebar.write(f"상태: {company_info['connected']}")
+# 로고와 상태 표시
+st.sidebar.image(company_info['logo'], width=150, use_column_width=True, caption=None, output_format='auto')
+st.sidebar.markdown(f"<div class='sidebar-company-status'>상태: {company_info['connected']}</div>", unsafe_allow_html=True)
 
-# 탭 선택 (수평 배치)
+# 구분선 추가
+st.sidebar.markdown("<div class='divider'></div>", unsafe_allow_html=True)
+
+# 생산 관리 탭 섹션
 if 'selected_tab' not in st.session_state:
     st.session_state.selected_tab = "생산 관리"
 
-# HTML로는 아무리해도 배치 적용이 안되므로 임의로 다중 컬럼 사용
-col1, col2, col3, col4, col5, col6, col7, col8, col9, col10 = st.columns(10)
+# 탭 버튼 배치
+col1, col2 = st.sidebar.columns(2)
 with col1:
     if st.button("생산 관리"):
         st.session_state.selected_tab = "생산 관리"
 with col2:
     if st.button("자재 관리"):
         st.session_state.selected_tab = "자재 관리"
+
 selected_tab = st.session_state.selected_tab
 
 # 선택된 탭에 따라 사이드바 메뉴 변경
 if selected_tab == "생산 관리":
-    st.sidebar.markdown("""
-        <style>
-            .custom-title {
-                font-size: 30px;
-                margin-bottom: -55px;
-            }
-        </style>
-        <h3 class='custom-title'>생산 관리</h3>
-        """, unsafe_allow_html=True)
-    
-    # 생산 관리 드롭다운 메뉴
+    st.sidebar.markdown("<div class='sidebar-section sidebar-title'>생산 관리</div>", unsafe_allow_html=True)
     page = st.sidebar.selectbox('', ("생산계획관리", "생산실적관리", "생산현황관리", "재고관리"))
 
-    # 선택한 페이지에 따라 해당 함수 호출
     if page == "생산계획관리":
         page1_view()
     elif page == "생산실적관리":
@@ -79,20 +100,9 @@ if selected_tab == "생산 관리":
         page4_view()
 
 elif selected_tab == "자재 관리":
-    st.sidebar.markdown("""
-        <style>
-            .custom-title {
-                font-size: 30px;
-                margin-bottom: -55px;
-            }
-        </style>
-        <h3 class='custom-title'>자재 관리</h3>
-        """, unsafe_allow_html=True)
-    
-    # 자재 관리 드롭다운 메뉴
+    st.sidebar.markdown("<div class='sidebar-section sidebar-title'>자재 관리</div>", unsafe_allow_html=True)
     page = st.sidebar.selectbox('', ("자재계획관리", "자재입고관리"))
 
-    # 선택한 페이지에 따라 해당 함수 호출
     if page == "자재계획관리":
         material_page1_view()
     elif page == "자재입고관리":

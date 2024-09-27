@@ -1,4 +1,4 @@
-# 자재계획관리
+# 자재관리 - 자재계획관리
 
 from matplotlib import font_manager, rc
 import streamlit as st

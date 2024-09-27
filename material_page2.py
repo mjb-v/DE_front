@@ -1,3 +1,5 @@
+# 자재관리 - LOT재고관리
+
 from matplotlib import font_manager, rc
 import streamlit as st
 import pandas as pd
