@@ -59,7 +59,7 @@ def get_all_plan(year: int):
 
 # 1-2. 아래 - 당월 플랜
 def get_material_all_plan(year: int, month: int):
-    response = requests.get(f"{API_URL}/materials/rate/{year},{month}")
+    response = requests.get(f"{API_URL}/materials/rates/{year},{month}")
     if response.status_code == 200:
         data = response.json()
         if data:

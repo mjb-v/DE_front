@@ -1,4 +1,4 @@
-# 재고관리
+# 생산관리 4. 재고관리
 
 import streamlit as st
 import pandas as pd
@@ -42,8 +42,9 @@ def get_inventory_data():
         st.error("재고관리 데이터를 가져오는 데 실패했습니다.")
         return None
 
+# ----------------------------------------------------------------
 def page4_view():
-    st.title("재고관리 페이지")
+    st.title("재고 관리")
     df = get_inventory_data().drop(columns=["id", "account_idx"])
     st.dataframe(df)
 

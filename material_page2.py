@@ -33,7 +33,7 @@ def translate_data(data):
     return pd.DataFrame(data).rename(columns=translation_dict)
 
 def get_material_inventory_data():
-    response = requests.get(f"{API_URL}/material_invens/all/")
+    response = requests.get(f"{API_URL}/materials_in_out/all/")
     if response.status_code == 200:
         data = response.json()
         return translate_data(data)
@@ -43,7 +43,6 @@ def get_material_inventory_data():
 
 # ----------------------------------------------------------------
 def material_page2_view():
-    pass
-    # st.title("자재입고관리 페이지")
-    # df = get_material_inventory_data().drop(columns=["id", "account_idx"])
-    # st.dataframe(df)
+    st.title("자재 입고 관리")
+    df = get_material_inventory_data().drop(columns=["id", "account_idx"])
+    st.dataframe(df)

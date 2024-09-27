@@ -1,3 +1,5 @@
+# 생산관리 2. 생산실적관리
+
 import streamlit as st
 import pandas as pd
 import plotly.express as px
@@ -23,7 +25,7 @@ def translate_data(data):
         "production_efficiency": "생산효율",
         "operating_time": "가동시간",
         "non_operating_time": "비가동시간",
-        "equipment_efficiency": "설비효율"
+        "line_efficiency": "설비효율"
     }
     return pd.DataFrame(data).rename(columns=translation_dict)
 
@@ -44,7 +46,7 @@ def get_production_data(start_date, end_date, operator, item_number, item_name):
 
 # ----------------------------------------------------------------
 def page2_view():
-    st.title("생산실적 조회")
+    st.title("생산 실적 관리")
 
     st.sidebar.markdown("<div class='sidebar-section sidebar-subtitle'>필터 설정</div>", unsafe_allow_html=True)
 

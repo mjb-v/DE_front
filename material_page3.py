@@ -44,6 +44,6 @@ def get_material_LOT_inventory_data():
 
 # ----------------------------------------------------------------
 def material_page3_view():
-    st.title("LOT 재고관리 페이지")
+    st.title("LOT 재고 관리")
     df = get_material_LOT_inventory_data().drop(columns=["account_idx"])
     st.dataframe(df)
