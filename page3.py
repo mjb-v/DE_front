@@ -44,7 +44,7 @@ def translate_data(data):
     }
     return pd.DataFrame(data).rename(columns=translation_dict)
 
-# GET 실시간 가동 현황 데이터
+# 1. GET 실시간 가동 현황 데이터
 def get_real_time_status(date=None):
     # 실시간을 위해 오늘 날짜로 설정
     if date is None:
@@ -58,7 +58,7 @@ def get_real_time_status(date=None):
         st.error("실시간 가동 현황 데이터를 가져오는 데 실패했습니다.")
         return pd.DataFrame()
 
-# GET 연도별 효율 현황 데이터
+# 2. GET 연도별 효율 현황 데이터
 def get_efficiency_status(year=2024):
     response = requests.get(f"{API_URL}/productions/efficiency/{year}")
     if response.status_code == 200:
