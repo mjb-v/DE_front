@@ -6,6 +6,7 @@ from page3 import page3_view
 from page4 import page4_view
 from material_page1 import material_page1_view
 from material_page2 import material_page2_view
+from material_page3 import material_page3_view
 
 # 페이지 설정
 st.set_page_config(layout="wide")
@@ -107,9 +108,11 @@ if selected_tab == "생산 관리":
 
 elif selected_tab == "자재 관리":
     st.sidebar.markdown("<div class='sidebar-section sidebar-title'>자재 관리</div>", unsafe_allow_html=True)
-    page = st.sidebar.selectbox('', ("자재계획관리", "LOT재고관리"))
+    page = st.sidebar.selectbox('', ("자재계획관리", "자재입고관리", "LOT재고관리"))
 
     if page == "자재계획관리":
         material_page1_view()
-    elif page == "LOT재고관리":
+    elif page == "자재입고관리":
         material_page2_view()
+    elif page == "LOT재고관리":
+        material_page3_view()

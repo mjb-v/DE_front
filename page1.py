@@ -32,7 +32,7 @@ def translate_data(data):
         "item_name": "품명",
         "model": "모델",
         "price": "단가",
-        "inventory": "수량"
+        "inventory": "생산계획"
     }
     return pd.DataFrame(data).rename(columns=translation_dict)
 
@@ -89,25 +89,22 @@ def delete_production_plan(plan_id):
         st.error("생산 계획 삭제에 실패했습니다.")
 
 # 생산계획 입력 필드
-def production_plan_form(item_number="", item_name="", model="가전", year=2024, month=1, inventory=0, price=0, form_key=""):
-    # 각 입력 필드에 고유한 키 추가
-    item_number = st.text_input("품번 입력", item_number, key=f"item_number_{form_key}")
-    item_name = st.text_input("품명 입력", item_name, key=f"item_name_{form_key}")
-    
-    # 모델 선택을 selectbox로 수정
+def production_plan_form(year=2024, month=1, item_number="", item_name="", model="가전", price=0, inventory=0, form_key=""):
     model_options = ["가전", "건조기", "세탁기", "식기세척기", "에어컨", "중장비", "포장박스", "LX2PE", "GEN3.5", "MX5"]
-    model = st.selectbox("모델 선택", options=model_options, index=model_options.index(model), key=f"model_{form_key}")
-    
+
     col1, col2 = st.columns([1, 1])
     with col1:
         year = st.selectbox("년도 선택", options=list(range(2014, 2100)), index=year - 2014, key=f"year_{form_key}")
     with col2:
         month = st.selectbox("월 선택", options=list(range(1, 13)), index=month - 1, key=f"month_{form_key}")
-    
-    inventory = st.number_input("계획 수량", min_value=0, value=inventory, key=f"inventory_{form_key}")
+
+    item_number = st.text_input("품번 입력", item_number, key=f"item_number_{form_key}")
+    item_name = st.text_input("품명 입력", item_name, key=f"item_name_{form_key}")
+    model = st.selectbox("모델 선택", options=model_options, index=model_options.index(model), key=f"model_{form_key}")
     price = st.number_input("단가", min_value=0, value=price, key=f"price_{form_key}")
+    inventory = st.number_input("생산 계획 수량", min_value=0, value=inventory, key=f"inventory_{form_key}")
     
-    return item_number, item_name, model, year, month, inventory, price
+    return year, month, item_number, item_name, model, price, inventory
 
 # ------------------------------------------------------------------------------------
 
@@ -153,7 +150,7 @@ def page1_view():
     elif tab == "생산 계획 등록/수정":
         df = get_plan_register()
         if not df.empty:
-            df_display = df.drop(columns=["id"])[['날짜', '품번', '품명', '모델', '수량', '단가']]
+            df_display = df.drop(columns=["id"])[['날짜', '품번', '품명', '모델', '단가', '생산계획']]
             st.dataframe(df_display)
 
         # 수정/삭제할 행 선택 및 버튼 배치
@@ -195,14 +192,14 @@ def page1_view():
             )
 
             with st.form(key="update_form"):
-                update_item_number, update_item_name, update_model, update_year, update_month, update_inventory, update_price = production_plan_form(
+                update_year, update_month, update_item_number, update_item_name, update_model, update_price, update_inventory = production_plan_form(
+                    int(selected_row['날짜'].split('-')[0]),
+                    int(selected_row['날짜'].split('-')[1]),
                     selected_row['품번'],
                     selected_row['품명'],
                     selected_row['모델'],
-                    int(selected_row['날짜'].split('-')[0]),
-                    int(selected_row['날짜'].split('-')[1]),
-                    int(selected_row['수량']),
                     int(selected_row['단가']),
+                    int(selected_row['생산계획']),
                     form_key="edit")
 
                 if st.form_submit_button("저장"):
@@ -238,7 +235,7 @@ def page1_view():
         )
 
         with st.form(key="create_form"):
-            new_item_number, new_item_name, new_model, new_year, new_month, new_inventory, new_price = production_plan_form(form_key="create")
+            new_year, new_month, new_item_number, new_item_name, new_model, new_price, new_inventory = production_plan_form(form_key="create")
             if st.form_submit_button("저장"):
                 new_data = {
                     "year": new_year,

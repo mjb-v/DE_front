@@ -1,4 +1,4 @@
-# 자재관리 - 자재계획관리
+# 자재관리 1. 자재계획관리
 
 from matplotlib import font_manager, rc
 import streamlit as st
@@ -87,7 +87,6 @@ def create_material_plan(data):
     response = requests.post(f"{API_URL}/materials/", json=data)
     if response.status_code == 200:
         st.success("자재관리 계획이 성공적으로 저장되었습니다!")
-        st.session_state['refresh_table'] = True
     else:
         st.error("자재관리 계획 저장에 실패했습니다.")
 
@@ -96,7 +95,6 @@ def update_material_plan(material_id, data):
     response = requests.put(f"{API_URL}/materials/{material_id}", json=data)
     if response.status_code == 200:
         st.success("자재관리 계획이 성공적으로 수정되었습니다!")
-        st.session_state['refresh_table'] = True
     else:
         st.error("자재관리 계획 수정에 실패했습니다.")
 
@@ -105,27 +103,26 @@ def delete_material_plan(material_id):
     response = requests.delete(f"{API_URL}/materials/{material_id}")
     if response.status_code == 200:
         st.success("자재관리 계획이 성공적으로 삭제되었습니다!")
-        st.session_state['refresh_table'] = True
     else:
         st.error("자재관리 계획 삭제에 실패했습니다.")
 
 # 2. 자재관리계획 입력 필드
-def material_plan_form(client = "", item_number="", item_name="", item_category="원재료", model="가전", date=None, quantity=0, process="사출", form_key=""):
-    client = st.selectbox("거래처명", options=company_names, index=company_names.index(client) if client in company_names else 0, key=f"company_names_{form_key}")
-    item_number = st.text_input("품번 입력", item_number, key=f"item_number_{form_key}")
-    item_name = st.text_input("품명 입력", item_name, key=f"item_name_{form_key}")
-    quantity = st.number_input("계획 수량", min_value=0, value=quantity, key=f"quantity_{form_key}")
-
+def material_plan_form(date=None, client = "", item_number="", item_name="", item_category="원재료", model="가전", process="사출", quantity=0, form_key=""):
     category_options = ["원재료", "부재료", "재공품", "제품", "반제품"]
-    item_category = st.selectbox("품목 선택", options=category_options, index=category_options.index(item_category), key=f"item_category_{form_key}")
     model_options = ["가전", "건조기", "세탁기", "식기세척기", "에어컨", "중장비", "포장박스", "LX2PE", "GEN3.5", "MX5"]
-    model = st.selectbox("모델 선택", options=model_options, index=model_options.index(model), key=f"model_{form_key}")
     process_options = ["검사/조립", "사출"]
-    process = st.selectbox("공정 구분", options=process_options, index=process_options.index(process), key=f"process_{form_key}")
-    
+
     if date is None:
         date = datetime.today().date()
     selected_date = st.date_input("날짜 선택", value=date, key=f"date_{form_key}")
+
+    client = st.selectbox("거래처명", options=company_names, index=company_names.index(client) if client in company_names else 0, key=f"company_names_{form_key}")
+    item_number = st.text_input("품번 입력", item_number, key=f"item_number_{form_key}")
+    item_name = st.text_input("품명 입력", item_name, key=f"item_name_{form_key}")
+    item_category = st.selectbox("품목 선택", options=category_options, index=category_options.index(item_category), key=f"item_category_{form_key}")
+    model = st.selectbox("모델 선택", options=model_options, index=model_options.index(model), key=f"model_{form_key}")
+    process = st.selectbox("공정 구분", options=process_options, index=process_options.index(process), key=f"process_{form_key}")
+    quantity = st.number_input("계획 수량", min_value=0, value=quantity, key=f"quantity_{form_key}")
 
     return client, item_number, item_name, item_category, model, selected_date, quantity, process
 
