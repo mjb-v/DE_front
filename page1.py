@@ -69,7 +69,6 @@ def create_production_plan(data):
     response = requests.post(f"{API_URL}/plans/", json=data)
     if response.status_code == 200:
         st.success("생산 계획이 성공적으로 저장되었습니다!")
-        st.session_state['refresh_table'] = True  # 테이블 새로고침
     else:
         st.error("생산 계획 저장에 실패했습니다.")
 
@@ -78,7 +77,6 @@ def update_production_plan(plan_id, data):
     response = requests.put(f"{API_URL}/plans/{plan_id}", json=data)
     if response.status_code == 200:
         st.success("생산 계획이 성공적으로 수정되었습니다!")
-        st.session_state['refresh_table'] = True
     else:
         st.error("생산 계획 수정에 실패했습니다.")
 
@@ -87,7 +85,6 @@ def delete_production_plan(plan_id):
     response = requests.delete(f"{API_URL}/plans/{plan_id}")
     if response.status_code == 200:
         st.success("생산 계획이 성공적으로 삭제되었습니다!")
-        st.session_state['refresh_table'] = True
     else:
         st.error("생산 계획 삭제에 실패했습니다.")
 
@@ -153,79 +150,103 @@ def page1_view():
 
     # 2. 생산 계획 등록/수정 페이지
     elif tab == "생산 계획 등록/수정":
-        st.subheader("생산 계획 등록/수정")
+        df = get_plan_register()
+        if not df.empty:
+            df_display = df.drop(columns=["id"])[['날짜', '품번', '품명', '모델', '수량', '단가']]
+            st.dataframe(df_display)
 
-        if 'refresh_table' not in st.session_state:
-            st.session_state['refresh_table'] = False
+        # 수정/삭제할 행 선택 및 버튼 배치
+        st.subheader("수정/삭제")
+        col1, col2 = st.columns([2, 1])
 
-        if st.session_state['refresh_table']:
-            reg_data = get_plan_register()  # 테이블 데이터 새로 가져옴
-            st.session_state['refresh_table'] = False  # 새로고침 후 플래그 초기화
-        else:
-            reg_data = st.session_state.get('reg_data', get_plan_register())  # 처음에는 데이터를 불러옴
+        with col1:
+                selected_index = st.selectbox("수정/삭제할 행의 번호 선택", df.index, key="select_index")
 
-        if not reg_data.empty:
-            st.dataframe(reg_data[['날짜', '품번', '품명', '모델', '수량', '단가']])
+        with col2:
+            selected_row = df.loc[selected_index]
+            prod_id = selected_row["id"]
 
-            # 수정/삭제할 행의 인덱스를 선택할 selectbox # label_visibility='collapsed'
-            col1, col2 = st.columns([2, 1])
-            with col1:
-                selected_index = st.selectbox("수정/삭제할 행의 인덱스 선택", reg_data.index, key="select_index")
+            # 수정 버튼
+            if st.button("수정", key="edit_button"):
+                st.session_state['is_editing'] = True
 
-            with col2:
-                # 수정/삭제 버튼을 가깝게 배치
-                if st.button("수정", key="edit_button"):
-                    selected_plan = reg_data.loc[selected_index]
-                    st.session_state['edit_row_id'] = selected_plan['id']
+            # 삭제 버튼
+            if st.button("삭제", key="delete_button"):
+                delete_production_plan(prod_id)
+                st.rerun()
 
-                if st.button("삭제", key="delete_button"):
-                    selected_plan = reg_data.loc[selected_index]
-                    delete_production_plan(selected_plan['id'])
+        # 수정할 행이 선택된 경우에만 필드 생성
+        if st.session_state.get('is_editing', False):  
+            st.markdown(
+                """
+                <style>
+                .edit-header {
+                    background-color: #f0f8ff;  /* 밝은 파란색 배경 */
+                    padding: 10px;
+                    border-radius: 5px;
+                    font-size: 1.5rem;
+                    font-weight: bold;
+                }
+                </style>
+                <div class="edit-header">수정 입력 필드</div>
+                """, 
+                unsafe_allow_html=True
+            )
 
-            # 수정할 행이 선택된 경우에만 수정 폼을 보여줌
-            if 'edit_row_id' in st.session_state and st.session_state['edit_row_id'] == reg_data.loc[selected_index]['id']:
-                selected_plan = reg_data.loc[selected_index]
-                st.subheader(f"수정할 항목: {selected_plan['품번']} - {selected_plan['품명']}")
+            with st.form(key="update_form"):
+                update_item_number, update_item_name, update_model, update_year, update_month, update_inventory, update_price = production_plan_form(
+                    selected_row['품번'],
+                    selected_row['품명'],
+                    selected_row['모델'],
+                    int(selected_row['날짜'].split('-')[0]),
+                    int(selected_row['날짜'].split('-')[1]),
+                    int(selected_row['수량']),
+                    int(selected_row['단가']),
+                    form_key="edit")
 
-                # 수정할 값을 입력할 수 있는 폼 생성
-                with st.form(key="edit_form"):
-                    update_item_number, update_item_name, update_model, update_year, update_month, update_inventory, update_price = production_plan_form(
-                        selected_plan['품번'], selected_plan['품명'], selected_plan['모델'],
-                        int(selected_plan['날짜'].split('-')[0]), int(selected_plan['날짜'].split('-')[1]),
-                        int(selected_plan['수량']), int(selected_plan['단가']),
-                        form_key="edit")
-
-                    # 수정된 내용을 저장하는 버튼
-                    if st.form_submit_button("저장"):
-                        updated_data = {
-                            "year": update_year,
-                            "month": update_month,
-                            "item_number": update_item_number,
-                            "item_name": update_item_name,
-                            "inventory": update_inventory,
-                            "model": update_model,
-                            "price": update_price
-                        }
-                        update_production_plan(st.session_state['edit_row_id'], updated_data)
-                        st.session_state['edit_row_id'] = None  # 수정 완료 후 초기화
-            else:
-                st.info("수정/삭제할 행을 선택하고 버튼을 클릭하세요.")
-        else:
-            st.warning("등록된 생산 계획이 없습니다.")
+                if st.form_submit_button("저장"):
+                    update_data = {
+                        "year": update_year,
+                        "month": update_month,
+                        "item_number": update_item_number,
+                        "item_name": update_item_name,
+                        "inventory": update_inventory,
+                        "model": update_model,
+                        "price": update_price
+                    }
+                    update_production_plan(prod_id, update_data)
+                    st.session_state['is_editing'] = False
+                    st.rerun()
+        st.markdown("---")
 
         # 새로운 생산 계획 등록
-        st.subheader("새로운 생산 계획 등록")
-        new_item_number, new_item_name, new_model, new_year, new_month, new_inventory, new_price = production_plan_form(form_key="new")
-
-        # 저장 버튼을 클릭했을 때 POST 요청
-        if st.button("저장"):
-            new_data = {
-                "year": new_year,
-                "month": new_month,
-                "item_number": new_item_number,
-                "item_name": new_item_name,
-                "inventory": new_inventory,
-                "model": new_model,
-                "price": new_price
+        st.markdown(
+            """
+            <style>
+            .create-header {
+                background-color: #e0ffe0;  /* 밝은 녹색 배경 */
+                padding: 10px;
+                border-radius: 5px;
+                font-size: 1.5rem;
+                font-weight: bold;
             }
-            create_production_plan(new_data)
+            </style>
+            <div class="create-header">새로운 생산 계획 저장</div>
+            """, 
+            unsafe_allow_html=True
+        )
+
+        with st.form(key="create_form"):
+            new_item_number, new_item_name, new_model, new_year, new_month, new_inventory, new_price = production_plan_form(form_key="create")
+            if st.form_submit_button("저장"):
+                new_data = {
+                    "year": new_year,
+                    "month": new_month,
+                    "item_number": new_item_number,
+                    "item_name": new_item_name,
+                    "inventory": new_inventory,
+                    "model": new_model,
+                    "price": new_price
+                }
+                create_production_plan(new_data)
+                st.rerun()

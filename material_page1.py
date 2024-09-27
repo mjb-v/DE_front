@@ -84,7 +84,7 @@ def get_plan_register():
         return pd.DataFrame()
 
 # 2-2. 자재관리계획 저장 POST
-def create_production_plan(data):
+def create_material_plan(data):
     response = requests.post(f"{API_URL}/materials/", json=data)
     if response.status_code == 200:
         st.success("자재관리 계획이 성공적으로 저장되었습니다!")
@@ -93,7 +93,7 @@ def create_production_plan(data):
         st.error("자재관리 계획 저장에 실패했습니다.")
 
 # 2-3. 자재관리계획 수정 PUT
-def update_production_plan(material_id, data):
+def update_material_plan(material_id, data):
     response = requests.put(f"{API_URL}/materials/{material_id}", json=data)
     if response.status_code == 200:
         st.success("자재관리 계획이 성공적으로 수정되었습니다!")
@@ -102,7 +102,7 @@ def update_production_plan(material_id, data):
         st.error("자재관리 계획 수정에 실패했습니다.")
 
 # 2-4. 자재관리계획 삭제 DELETE
-def delete_production_plan(material_id):
+def delete_material_plan(material_id):
     response = requests.delete(f"{API_URL}/materials/{material_id}")
     if response.status_code == 200:
         st.success("자재관리 계획이 성공적으로 삭제되었습니다!")
@@ -111,7 +111,7 @@ def delete_production_plan(material_id):
         st.error("자재관리 계획 삭제에 실패했습니다.")
 
 # 2. 자재관리계획 입력 필드
-def production_plan_form(client = "", item_number="", item_name="", item_category="원재료", model="가전", date=None, quantity=0, process="사출", form_key=""):
+def material_plan_form(client = "", item_number="", item_name="", item_category="원재료", model="가전", date=None, quantity=0, process="사출", form_key=""):
     client = st.selectbox("거래처명", options=company_names, index=company_names.index(client) if client in company_names else 0, key=f"company_names_{form_key}")
     item_number = st.text_input("품번 입력", item_number, key=f"item_number_{form_key}")
     item_name = st.text_input("품명 입력", item_name, key=f"item_name_{form_key}")
@@ -182,10 +182,10 @@ def material_page1_view():
 
             # 삭제 버튼
             if st.button("삭제", key="delete_button"):
-                delete_production_plan(material_id)
+                delete_material_plan(material_id)
                 st.rerun()
 
-        # 수정 입력 필드 표시
+        # 수정할 행이 선택된 경우에만 필드 생성
         if st.session_state.get('is_editing', False):  
             st.markdown(
                 """
@@ -203,9 +203,8 @@ def material_page1_view():
                 unsafe_allow_html=True
             )
 
-            # 입력 필드 섹션
             with st.form(key="update_form"):
-                client, item_number, item_name, item_category, model, selected_date, quantity, process = production_plan_form(
+                client, item_number, item_name, item_category, model, selected_date, quantity, process = material_plan_form(
                     client=selected_row["거래처명"],
                     item_number=selected_row["품번"],
                     item_name=selected_row["품명"],
@@ -214,8 +213,7 @@ def material_page1_view():
                     date=pd.to_datetime(selected_row["날짜"]).date(),
                     quantity=selected_row["계획수량"],
                     process=selected_row["공정구분"],
-                    form_key="update"
-                )
+                    form_key="update")
 
                 if st.form_submit_button("저장"):
                     update_data = {
@@ -228,7 +226,7 @@ def material_page1_view():
                         "quantity": quantity,
                         "process": process
                     }
-                    update_production_plan(material_id, update_data)
+                    update_material_plan(material_id, update_data)
                     st.session_state['is_editing'] = False
                     st.rerun()
         st.markdown("---")
@@ -245,14 +243,13 @@ def material_page1_view():
                 font-weight: bold;
             }
             </style>
-            <div class="create-header">새로운 계획 저장</div>
+            <div class="create-header">새로운 자재관리 계획 저장</div>
             """, 
             unsafe_allow_html=True
         )
 
-        # 새로운 계획 저장 필드
         with st.form(key="create_form"):
-            client, item_number, item_name, item_category, model, selected_date, quantity, process = production_plan_form(form_key="create")
+            client, item_number, item_name, item_category, model, selected_date, quantity, process = material_plan_form(form_key="create")
             if st.form_submit_button("저장"):
                 new_data = {
                     "client": client,
@@ -264,5 +261,5 @@ def material_page1_view():
                     "quantity": quantity,
                     "process": process
                 }
-                create_production_plan(new_data)
+                create_material_plan(new_data)
                 st.rerun()
