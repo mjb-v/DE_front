@@ -77,8 +77,7 @@ def get_plan_register():
     response = requests.get(f"{API_URL}/materials/all/")
     if response.status_code == 200:
         data = response.json()
-        df = translate_data(data)
-        return df
+        return translate_data(data)
     else:
         st.error("전체 자재관리 계획 리스트를 가져오는 데 실패했습니다.")
         return pd.DataFrame()

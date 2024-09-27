@@ -34,21 +34,18 @@ def translate_data(data):
     return pd.DataFrame(data).rename(columns=translation_dict)
 
 def get_inventory_data():
-    url = f"{API_URL}/inventories/all/"
-    response = requests.get(url)
+    response = requests.get(f"{API_URL}/inventories/all/")
     if response.status_code == 200:
-        return response.json()
+        data = response.json()
+        return translate_data(data)
     else:
-        st.error("데이터를 가져오는 데 실패했습니다.")
+        st.error("재고관리 데이터를 가져오는 데 실패했습니다.")
         return None
 
 def page4_view():
-    st.title("재고 관리 페이지")
-    data = get_inventory_data()
-
-    if data:
-        df = translate_data(data).drop(columns=["account_idx"])
-        st.dataframe(df)
+    st.title("재고관리 페이지")
+    df = get_inventory_data().drop(columns=["id", "account_idx"])
+    st.dataframe(df)
 
 if __name__ == "__main__":
     page4_view()

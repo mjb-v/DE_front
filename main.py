@@ -107,9 +107,9 @@ if selected_tab == "생산 관리":
 
 elif selected_tab == "자재 관리":
     st.sidebar.markdown("<div class='sidebar-section sidebar-title'>자재 관리</div>", unsafe_allow_html=True)
-    page = st.sidebar.selectbox('', ("자재계획관리", "자재입고관리"))
+    page = st.sidebar.selectbox('', ("자재계획관리", "LOT재고관리"))
 
     if page == "자재계획관리":
         material_page1_view()
-    elif page == "자재입고관리":
+    elif page == "LOT재고관리":
         material_page2_view()
