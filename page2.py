@@ -46,7 +46,8 @@ def get_production_data(start_date, end_date, operator, item_number, item_name):
 def page2_view():
     st.title("생산실적 조회")
 
-    st.sidebar.title("필터 설정")
+    st.sidebar.markdown("<div class='sidebar-section sidebar-subtitle'>필터 설정</div>", unsafe_allow_html=True)
+
     start_date = st.sidebar.date_input('시작 날짜', value=datetime(2024, 9, 1))
     end_date = st.sidebar.date_input('종료 날짜', value=datetime(2024, 9, 30))
     operator = st.sidebar.text_input('작업자 이름 입력')

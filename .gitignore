@@ -7,3 +7,4 @@ conda-meta/
 DE_B/
 .env
 test.py
+var_names_list.py

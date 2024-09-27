@@ -34,6 +34,12 @@ st.sidebar.markdown("""
             margin-bottom: 15px;
             text-align: center;
         }
+        .sidebar-subtitle {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-align: center;
+        }
         .sidebar-company-logo {
             display: block;
             margin-left: auto;
