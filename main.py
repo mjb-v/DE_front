@@ -67,7 +67,7 @@ st.sidebar.markdown("""
 
 # 기업 선택 섹션
 st.sidebar.markdown("<div class='sidebar-section sidebar-title'>기업 선택</div>", unsafe_allow_html=True)
-selected_company = st.sidebar.selectbox(" ", list(companies.keys()), label_visibility="collapsed")
+selected_company = st.sidebar.selectbox(" ", list(companies.keys()))
 company_info = companies[selected_company]
 
 # 로고와 상태 표시
