@@ -49,6 +49,8 @@ def get_real_time_status(date=None):
     # 실시간을 위해 오늘 날짜로 설정
     if date is None:
         date = datetime.today().strftime('%Y-%m-%d')
+    else:
+        date = datetime.strptime(date, '%Y-%m-%d').strftime('%Y-%m-%d')
 
     response = requests.get(f"{API_URL}/productions/day/{date}")
     if response.status_code == 200:
@@ -135,7 +137,8 @@ def page3_view():
         chart_placeholder = st.empty()
 
         while True:
-            df1 = get_real_time_status().drop(columns=["id", "account_idx"])[
+            # 임시로 빈 인자 대신 0927 사용
+            df1 = get_real_time_status("2024-09-27").drop(columns=['id', 'account_idx'])[
                 ["가동일자", "공정", "라인", "작업자", "근무조", "품번", "품명", "규격", "가동시간", "생산수량", "생산효율", "라인가동율"]
             ]
             df1['라인'] = pd.Categorical(df1['라인'], categories=[f"Line{i}" for i in range(1, 11)], ordered=True)

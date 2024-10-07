@@ -158,7 +158,7 @@ def page1_view():
         col1, col2 = st.columns([2, 1])
 
         with col1:
-                selected_index = st.selectbox("수정/삭제할 행의 번호 선택", df.index, key="select_index")
+                selected_index = st.selectbox("수정/삭제할 줄의 번호 선택", df.index, key="select_index")
 
         with col2:
             selected_row = df.loc[selected_index]
@@ -186,7 +186,7 @@ def page1_view():
                     font-weight: bold;
                 }
                 </style>
-                <div class="edit-header">수정 입력 필드</div>
+                <div class="edit-header">테이블 수정</div>
                 """, 
                 unsafe_allow_html=True
             )

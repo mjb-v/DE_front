@@ -129,7 +129,7 @@ def material_plan_form(date=None, client = "", item_number="", item_name="", ite
 # ----------------------------------------------------------------
 def material_page1_view():
     st.title("자재 계획 관리")
-    tab = st.sidebar.radio("", ["자재 계획 조회", "자재 계획 등록"])
+    tab = st.sidebar.radio("", ["자재 계획 조회", "자재 계획 등록/수정"])
 
     if tab == "자재 계획 조회":
         st.sidebar.markdown("<div class='sidebar-section sidebar-subtitle'>필터 설정</div>", unsafe_allow_html=True)
@@ -155,7 +155,7 @@ def material_page1_view():
         ax.legend()
         st.pyplot(fig)
 
-    elif tab == "자재 계획 등록":
+    elif tab == "자재 계획 등록/수정":
         # 전체 데이터 가져오기 및 테이블 표시
         df = get_plan_register()
         if not df.empty:
@@ -167,7 +167,7 @@ def material_page1_view():
         col1, col2 = st.columns([2, 1])
 
         with col1:
-            selected_index = st.selectbox("수정/삭제할 행의 번호 선택", df.index, key="select_index")
+            selected_index = st.selectbox("수정/삭제할 줄의 번호 선택", df.index, key="select_index")
             
         with col2:
             selected_row = df.loc[selected_index]
@@ -195,7 +195,7 @@ def material_page1_view():
                     font-weight: bold;
                 }
                 </style>
-                <div class="edit-header">수정 입력 필드</div>
+                <div class="edit-header">테이블 수정</div>
                 """, 
                 unsafe_allow_html=True
             )
