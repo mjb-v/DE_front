@@ -33,7 +33,7 @@ def translate_data(data):
     return pd.DataFrame(data).rename(columns=translation_dict)
 
 def get_material_LOT_inventory_data():
-    response = requests.get(f"{API_URL}/material_invens/all/")
+    response = requests.get(f"{API_URL}/material_LOT/all/")
     if response.status_code == 200:
         data = response.json()
         return translate_data(data)

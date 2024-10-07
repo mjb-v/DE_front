@@ -40,7 +40,7 @@ def translate_data(data):
 
 def get_material_inventory_data(year: int, month: int):
     params = {"year": year, "month": month}
-    response = requests.get(f"{API_URL}/material_invens_managements/month/", params=params)
+    response = requests.get(f"{API_URL}/material_invens/month/", params=params)
     if response.status_code == 200:
         data = response.json()
         return translate_data(data)
