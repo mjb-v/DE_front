@@ -36,7 +36,7 @@ def translate_data(data):
     }
     return pd.DataFrame(data).rename(columns=translation_dict)
 
-# GET 전체 생산 계획 리스트 불러오기 및 가공
+# 1-1. GET 전체 생산 계획 리스트 불러오기 및 가공
 def get_all_plan(year: int):
     response = requests.get(f"{API_URL}/plans/rate/{year}")
     if response.status_code == 200:
@@ -48,7 +48,22 @@ def get_all_plan(year: int):
         st.error("데이터를 불러오는 데 실패했습니다.")
         return None
 
-# GET 등록 페이지 테이블 데이터
+# 1-2. 아래 - 당월 플랜
+def get_monthly_plan(year: int, month: int):
+    response = requests.get(f"{API_URL}/plans/rates/{year},{month}")
+    if response.status_code == 200:
+        data = response.json()
+        if data:
+            df = translate_data(data)
+            return df
+        else:
+            st.warning(f"{year}년 {month}월에 해당하는 데이터가 없습니다.")
+            return pd.DataFrame()
+    else:
+        st.error("데이터를 불러오는 데 실패했습니다.")
+        return None
+
+# 2-1. GET 등록 페이지 테이블 데이터
 def get_plan_register():
     response = requests.get(f"{API_URL}/plans/all/")
     if response.status_code == 200:
@@ -64,7 +79,7 @@ def get_plan_register():
         st.error("전체 생산 계획 리스트를 가져오는 데 실패했습니다.")
         return pd.DataFrame()
 
-# POST 생산 계획 저장
+# 2-2. POST 생산 계획 저장
 def create_production_plan(data):
     response = requests.post(f"{API_URL}/plans/", json=data)
     if response.status_code == 200:
@@ -72,7 +87,7 @@ def create_production_plan(data):
     else:
         st.error("생산 계획 저장에 실패했습니다.")
 
-# PUT 생산 계획 수정
+# 2-3. PUT 생산 계획 수정
 def update_production_plan(plan_id, data):
     response = requests.put(f"{API_URL}/plans/{plan_id}", json=data)
     if response.status_code == 200:
@@ -80,7 +95,7 @@ def update_production_plan(plan_id, data):
     else:
         st.error("생산 계획 수정에 실패했습니다.")
 
-# DELETE 생산 계획 삭제
+# 2-4. DELETE 생산 계획 삭제
 def delete_production_plan(plan_id):
     response = requests.delete(f"{API_URL}/plans/{plan_id}")
     if response.status_code == 200:
@@ -88,7 +103,7 @@ def delete_production_plan(plan_id):
     else:
         st.error("생산 계획 삭제에 실패했습니다.")
 
-# 생산계획 입력 필드
+# 2. 생산계획 입력 필드
 def production_plan_form(year=2024, month=1, item_number="", item_name="", model="가전", price=0, inventory=0, form_key=""):
     model_options = ["가전", "건조기", "세탁기", "식기세척기", "에어컨", "중장비", "포장박스", "LX2PE", "GEN3.5", "MX5"]
 
@@ -116,17 +131,19 @@ def page1_view():
     if tab == "생산 계획 조회":
         st.sidebar.markdown("<div class='sidebar-section sidebar-subtitle'>필터 설정</div>", unsafe_allow_html=True)
         selected_year = st.sidebar.selectbox("년도 선택", list(range(2014, 2025)), index=10)
+        selected_month = st.sidebar.selectbox("월 선택", list(range(1, 13)), index=8)
         df = get_all_plan(selected_year)
+        df2 = get_monthly_plan(selected_year, selected_month)
 
         # 테이블 형식으로 변환 (month를 columns로, 나머지를 index로 변환, row 순서 정렬)
-        df_pivot = df.set_index('월').T
-        df_pivot.columns = [f"{month}월" for month in df_pivot.columns]
+        df1 = df.set_index('월').T
+        df1.columns = [f"{month}월" for month in df1.columns]
         row_order = ["사업계획", "사업실적", "사업달성율", "생산계획", "생산실적", "생산달성율"]
-        df_pivot = df_pivot.reindex(row_order)
-
-        # 테이블 출력
+        df1 = df1.reindex(row_order)
         st.subheader(f"{selected_year}년도 계획 및 실적 데이터")
-        st.dataframe(df_pivot)
+        st.dataframe(df1)
+        st.subheader(f"{selected_year}년 {selected_month}월")
+        st.dataframe(df2)
 
         # 그래프
         st.subheader(f"{selected_year}년 차트")
