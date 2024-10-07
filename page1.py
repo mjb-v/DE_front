@@ -115,7 +115,7 @@ def page1_view():
     # 1. 생산 계획 조회 페이지
     if tab == "생산 계획 조회":
         st.sidebar.markdown("<div class='sidebar-section sidebar-subtitle'>필터 설정</div>", unsafe_allow_html=True)
-        selected_year = st.sidebar.selectbox("년도 선택", list(range(2014, 2025)))
+        selected_year = st.sidebar.selectbox("년도 선택", list(range(2014, 2025)), index=10)
         df = get_all_plan(selected_year)
 
         # 테이블 형식으로 변환 (month를 columns로, 나머지를 index로 변환, row 순서 정렬)
