@@ -188,6 +188,7 @@ def edit_page():
             selected_row['매입구분']
         )
         form_submitted = st.form_submit_button("저장")
+    st.button('뒤로가기', on_click=go_to_page, args=('main',))
 
     if form_submitted:
         update_data = {

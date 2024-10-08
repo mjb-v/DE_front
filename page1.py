@@ -32,7 +32,11 @@ def translate_data(data):
         "item_name": "품명",
         "model": "모델",
         "price": "단가",
-        "inventory": "생산계획"
+        "inventory": "생산계획",
+        "previous_amount": "전월실적",
+        "current_amount": "당월실적",
+        "growth_rate": "증감율",
+        "process": "공정구분"
     }
     return pd.DataFrame(data).rename(columns=translation_dict)
 
