@@ -59,7 +59,7 @@ def page2_view():
     item_number = st.sidebar.text_input('품번 입력')
     item_name = st.sidebar.text_input('품명 입력')
 
-    if st.sidebar.button('검색'):
+    if 'df' not in st.session_state or st.sidebar.button('검색'):
         df = get_production_data(start_date, end_date, operator, item_number, item_name)
         if not df.empty:
             selected_columns = ["날짜", "품번", "품명", "라인", "작업자", "모델", "생산수량", "생산효율", "가동시간", "설비효율"]

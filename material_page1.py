@@ -133,8 +133,11 @@ def material_page1_view():
 
     if tab == "자재 계획 조회":
         st.sidebar.markdown("<div class='sidebar-section sidebar-subtitle'>필터 설정</div>", unsafe_allow_html=True)
-        selected_year = st.sidebar.selectbox("년도 선택", list(range(2014, 2025)), index=10)
-        selected_month = st.sidebar.selectbox("월 선택", list(range(1, 13)), index=9)
+
+        current_year = datetime.today().year
+        current_month = datetime.today().month
+        selected_year = st.sidebar.selectbox("년도 선택", list(range(2014, 2025)), index=list(range(2014, 2025)).index(current_year))
+        selected_month = st.sidebar.selectbox("월 선택", list(range(1, 13)), index=list(range(1, 13)).index(current_month))
 
         df, df1 = get_all_plan(selected_year)
         df2 = get_material_all_plan(selected_year, selected_month)
@@ -144,7 +147,6 @@ def material_page1_view():
         st.dataframe(df2)
 
         # 그래프 --> 거래처 선택 & 해당 년도의 증감율만 보여주기
-        st.subheader(f"{selected_year}년 차트")
         business_achievement_rates = df["사업달성율"]
         months = df["월"].apply(lambda x: f"{x}월")
         fig, ax = plt.subplots(figsize=(8, 6))

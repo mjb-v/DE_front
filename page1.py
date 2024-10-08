@@ -112,6 +112,12 @@ def production_plan_form(year=2024, month=10, item_number="", item_name="", mode
     model_options = ["가전", "건조기", "세탁기", "식기세척기", "에어컨", "중장비", "포장박스", "LX2PE", "GEN3.5", "MX5"]
     process_options = ["사출", "검사/조립"]
 
+    today = datetime.today()
+    if year is None:
+        year = today.year
+    if month is None:
+        month = today.month
+
     col1, col2 = st.columns([1, 1])
     with col1:
         year = st.selectbox("년도", options=list(range(2014, 2100)), index=year - 2014, key=f"year_{form_key}")
@@ -136,8 +142,12 @@ def page1_view():
     # 1. 생산 계획 조회 페이지
     if tab == "생산 계획 조회":
         st.sidebar.markdown("<div class='sidebar-section sidebar-subtitle'>필터 설정</div>", unsafe_allow_html=True)
-        selected_year = st.sidebar.selectbox("년도 선택", list(range(2014, 2025)), index=10)
-        selected_month = st.sidebar.selectbox("월 선택", list(range(1, 13)), index=9)
+
+        current_year = datetime.today().year
+        current_month = datetime.today().month
+        selected_year = st.sidebar.selectbox("년도 선택", list(range(2014, 2025)), index=list(range(2014, 2025)).index(current_year))
+        selected_month = st.sidebar.selectbox("월 선택", list(range(1, 13)), index=list(range(1, 13)).index(current_month))
+
         df = get_all_plan(selected_year)
         df2 = get_monthly_plan(selected_year, selected_month)
 
@@ -152,7 +162,6 @@ def page1_view():
         st.dataframe(df2)
 
         # 그래프
-        st.subheader(f"{selected_year}년 차트")
         business_achievement_rates = df["사업달성율"]
         production_achievement_rates = df["생산달성율"]
         months = df["월"].apply(lambda x: f"{x}월")

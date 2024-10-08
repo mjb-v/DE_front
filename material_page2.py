@@ -1,11 +1,11 @@
 # 자재관리 2. 자재입고관리
-
 from matplotlib import font_manager, rc
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 import requests
-from datetime import datetime, date
+from datetime import datetime
+from get_companies_list import company_names
 import os
 from dotenv import load_dotenv
 
@@ -67,7 +67,7 @@ def delete_material_inventory_data(material_id):
         st.error("삭제에 실패했습니다.")
 
 # 수정사항 입력 필드
-def material_inout_plan_form(selected_date=None, statement_number="", client="", delivery_quantity=0, defective_quantity=0, settlement_quantity=0, supply_amount=0, vat=0, total_amount=0, purchase_category=""):
+def material_inout_plan_form(selected_date=None, statement_number="", client="", delivery_quantity=0, defective_quantity=0, settlement_quantity=0, supply_amount=0, vat=0, total_amount=0, purchase_category="구매입고"):
 
     if selected_date is None:
         selected_date = datetime.today().date()
@@ -75,7 +75,7 @@ def material_inout_plan_form(selected_date=None, statement_number="", client="",
     selected_date = st.date_input("날짜 선택", value=selected_date)
 
     statement_number = st.text_input("전표번호", statement_number)
-    client = st.text_input("거래처명", client)
+    client = st.selectbox("거래처명", options=company_names, index=company_names.index(client) if client in company_names else 0)
     delivery_quantity = st.number_input("납품수량", min_value=0, value=delivery_quantity)
     defective_quantity = st.number_input("불량수량", min_value=0, value=defective_quantity)
     settlement_quantity = st.number_input("정산수량", min_value=0, value=settlement_quantity)
@@ -104,7 +104,6 @@ def main_page():
         selected_row = df.loc[selected_index]
         material_id = selected_row["id"]
 
-        st.session_state.selected_index = selected_index
         st.session_state.selected_row = selected_row
         st.session_state.material_id = material_id
 
@@ -151,11 +150,9 @@ def main_page():
             st.rerun()
 
 def edit_page():
-    selected_index = st.session_state.selected_index
     selected_row = st.session_state.selected_row
     material_id = st.session_state.material_id
 
-    st.title(f"테이블 수정 - {selected_index}")
     st.markdown(
         """
         <style>
