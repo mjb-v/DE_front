@@ -1,9 +1,10 @@
 # 생산관리 2. 생산실적관리
-
 import streamlit as st
 import pandas as pd
 import plotly.express as px
+import calendar
 from datetime import datetime
+from natsort import natsorted
 import requests
 import os
 from dotenv import load_dotenv
@@ -49,9 +50,11 @@ def page2_view():
     st.title("생산 실적 관리")
 
     st.sidebar.markdown("<div class='sidebar-section sidebar-subtitle'>필터 설정</div>", unsafe_allow_html=True)
+    today = datetime.today()
+    last_day = calendar.monthrange(today.year, today.month)[1]
 
-    start_date = st.sidebar.date_input('시작 날짜', value=datetime(2024, 9, 1))
-    end_date = st.sidebar.date_input('종료 날짜', value=datetime(2024, 9, 30))
+    start_date = st.sidebar.date_input('시작 날짜', value=datetime(today.year, today.month, 1))
+    end_date = st.sidebar.date_input('종료 날짜', value=datetime(today.year, today.month, last_day))
     operator = st.sidebar.text_input('작업자 이름 입력')
     item_number = st.sidebar.text_input('품번 입력')
     item_name = st.sidebar.text_input('품명 입력')
@@ -69,13 +72,22 @@ def page2_view():
         df = st.session_state['df']
         st.write("검색 결과:")
         st.dataframe(df)
-        lines = df['라인'].unique().tolist()
+        lines = natsorted(df['라인'].unique().tolist()) # 라인을 숫자로 정렬
 
-        # 그래프 - 생산효율
+        # 라인별 체크박스 가로로 배치
         st.subheader('라인별 생산효율')
-        selected_lines_efficiency = st.multiselect('라인 선택 (생산효율)', lines, default=lines)
+        selected_lines_efficiency = []
+        num_columns = 4
+        cols = st.columns(num_columns)
+
+        for i, line in enumerate(lines):
+            col = cols[i % num_columns]
+            if col.checkbox(f'{line}', value=True):
+                selected_lines_efficiency.append(line)
+        
         filtered_data_efficiency = df[df['라인'].isin(selected_lines_efficiency)]
 
+        # 생산효율 그래프
         fig_efficiency = px.line(
             filtered_data_efficiency, 
             x='날짜', 
@@ -84,13 +96,22 @@ def page2_view():
             title='라인별 생산효율',
             markers=True
         )
+        fig_efficiency.update_xaxes(tickformat='%b %d')
         st.plotly_chart(fig_efficiency)
 
-        # 그래프 - 설비효율
+        # 라인별 체크박스 - 설비효율
         st.subheader('라인별 설비효율')
-        selected_lines_equipment = st.multiselect('라인 선택 (설비효율)', lines, default=lines)
+        selected_lines_equipment = []
+        cols_equipment = st.columns(num_columns)
+
+        for i, line in enumerate(lines):
+            col = cols_equipment[i % num_columns]
+            if col.checkbox(f'{line}', value=True, key=f"equipment_{line}"):
+                selected_lines_equipment.append(line)
+
         filtered_data_equipment = df[df['라인'].isin(selected_lines_equipment)]
 
+        # 설비효율 그래프
         fig_equipment = px.line(
             filtered_data_equipment, 
             x='날짜', 
@@ -99,6 +120,7 @@ def page2_view():
             title='라인별 설비효율',
             markers=True
         )
+        fig_equipment.update_xaxes(tickformat='%b %d')
         st.plotly_chart(fig_equipment)
 
 if __name__ == "__main__":
