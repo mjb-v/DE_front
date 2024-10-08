@@ -55,6 +55,9 @@ st.sidebar.markdown("""
             color: #4CAF50;
             text-align: left;
         }
+        .stButton {
+            margin: 0 10px;
+        }
         .sidebar-selectbox {
             font-size: 16px;
             margin-bottom: 10px;
@@ -82,8 +85,8 @@ st.sidebar.markdown("<div class='divider'></div>", unsafe_allow_html=True)
 if 'selected_tab' not in st.session_state:
     st.session_state.selected_tab = "생산 관리"
 
-# 탭 버튼 배치
-col1, col2 = st.sidebar.columns(2)
+# 탭 버튼 배치 (간격 조정을 위해 빈 컬럼 추가)
+col1, col2, _ = st.sidebar.columns([1, 1, 1])
 with col1:
     if st.button("생산 관리"):
         st.session_state.selected_tab = "생산 관리"
@@ -95,21 +98,22 @@ selected_tab = st.session_state.selected_tab
 
 # 선택된 탭에 따라 사이드바 메뉴 변경
 if selected_tab == "생산 관리":
-    st.sidebar.markdown("<div class='sidebar-section sidebar-title'>생산 관리</div>", unsafe_allow_html=True)
-    page = st.sidebar.selectbox('', ("생산계획관리", "생산실적관리", "생산현황관리", "재고관리"))
+    st.sidebar.markdown("<div class='sidebar-section sidebar-title stButton'>생산 관리</div>", unsafe_allow_html=True)
+    page = st.sidebar.selectbox(' ', ("생산계획관리", "생산실적관리", "생산현황관리", "재고관리"))
 
     if page == "생산계획관리":
         page1_view()
     elif page == "생산실적관리":
         page2_view()
     elif page == "생산현황관리":
+        st.sidebar.empty()
         page3_view()
     elif page == "재고관리":
         page4_view()
 
 elif selected_tab == "자재 관리":
-    st.sidebar.markdown("<div class='sidebar-section sidebar-title'>자재 관리</div>", unsafe_allow_html=True)
-    page = st.sidebar.selectbox('', ("자재계획관리", "자재입고관리", "재고관리", "LOT재고관리"))
+    st.sidebar.markdown("<div class='sidebar-section sidebar-title stButton'>자재 관리</div>", unsafe_allow_html=True)
+    page = st.sidebar.selectbox(' ', ("자재계획관리", "자재입고관리", "재고관리", "LOT재고관리"))
 
     if page == "자재계획관리":
         material_page1_view()

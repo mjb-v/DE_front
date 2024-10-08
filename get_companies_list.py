@@ -121,4 +121,3 @@ html = """
 soup = BeautifulSoup(html, 'html.parser')
 options = soup.find_all('option')
 company_names = [option.text.strip() for option in options]
-print(company_names)

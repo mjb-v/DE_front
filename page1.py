@@ -131,7 +131,7 @@ def production_plan_form(year=2024, month=10, item_number="", item_name="", mode
 
 def page1_view():
     st.title("생산 계획 관리")
-    tab = st.sidebar.radio("", ["생산 계획 조회", "생산 계획 등록/수정"])
+    tab = st.sidebar.radio(" ", ["생산 계획 조회", "생산 계획 등록/수정"])
 
     # 1. 생산 계획 조회 페이지
     if tab == "생산 계획 조회":

@@ -129,7 +129,7 @@ def material_plan_form(date=None, client = "", item_number="", item_name="", ite
 # ----------------------------------------------------------------
 def material_page1_view():
     st.title("자재 계획 관리")
-    tab = st.sidebar.radio("", ["자재 계획 조회", "자재 계획 등록/수정"])
+    tab = st.sidebar.radio(" ", ["자재 계획 조회", "자재 계획 등록/수정"])
 
     if tab == "자재 계획 조회":
         st.sidebar.markdown("<div class='sidebar-section sidebar-subtitle'>필터 설정</div>", unsafe_allow_html=True)

@@ -127,12 +127,10 @@ def plot2(df, selected_year):
 
 def page3_view():
     st.title("생산 현황 관리")
-    tab = st.sidebar.radio("", ["실시간 가동 현황", "연도별 효율 현황"])
+    tab = st.sidebar.radio(" ", ["실시간 가동 현황", "연도별 효율 현황"])
 
     if tab == "실시간 가동 현황":
-        st.sidebar.markdown("<div class='sidebar-section sidebar-subtitle'>필터 설정</div>", unsafe_allow_html=True)
-
-        # Placeholder 생성
+        st.subheader("실시간 가동 현황")
         table_placeholder = st.empty()
         chart_placeholder = st.empty()
 
@@ -145,8 +143,8 @@ def page3_view():
             with chart_placeholder:
                 fig = plot1(df1)
                 st.pyplot(fig)
+                plt.close(fig)
 
-            # 5초 대기 후 다시 업데이트
             time.sleep(5)
 
     elif tab == "연도별 효율 현황":

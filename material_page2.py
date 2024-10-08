@@ -60,7 +60,7 @@ def update_material_inventory_data(material_id, data):
 
 # 삭제
 def delete_material_inventory_data(material_id):
-    response = requests.put(f"{API_URL}/materials_in_out/{material_id}")
+    response = requests.delete(f"{API_URL}/materials_in_out/{material_id}")
     if response.status_code == 200:
         st.success("성공적으로 삭제되었습니다!")
     else:
@@ -70,7 +70,7 @@ def delete_material_inventory_data(material_id):
 def material_inout_plan_form(selected_date=None, statement_number="", client="", delivery_quantity=0, defective_quantity=0, settlement_quantity=0, supply_amount=0, vat=0, total_amount=0, purchase_category=""):
 
     if selected_date is None:
-        selected_date = date(2024, 10, 7)
+        selected_date = datetime.today().date()
 
     selected_date = st.date_input("날짜 선택", value=selected_date)
 
