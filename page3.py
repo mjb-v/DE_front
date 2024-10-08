@@ -137,8 +137,7 @@ def page3_view():
         chart_placeholder = st.empty()
 
         while True:
-            # 임시로 빈 인자 대신 0927 사용
-            df1 = get_real_time_status("2024-09-27").drop(columns=['id', 'account_idx'])[
+            df1 = get_real_time_status().drop(columns=['id', 'account_idx'])[
                 ["가동일자", "공정", "라인", "작업자", "근무조", "품번", "품명", "규격", "가동시간", "생산수량", "생산효율", "라인가동율"]
             ]
             df1['라인'] = pd.Categorical(df1['라인'], categories=[f"Line{i}" for i in range(1, 11)], ordered=True)
@@ -156,5 +155,5 @@ def page3_view():
         df2 = get_efficiency_status(selected_year).drop(columns=["year"])
         df2_pivot = df2.set_index('월').T
         df2_pivot.columns = [f"{month}월" for month in df2_pivot.columns]
-        st.dataframe(df2_pivot)
+        st.dataframe(df2_pivot.style.set_properties(**{'width': '10px'}))
         plot2(df2, selected_year)

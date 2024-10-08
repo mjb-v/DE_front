@@ -110,9 +110,9 @@ def main_page():
 
         st.button('수정', on_click=go_to_page, args=('edit',))
 
-    if st.button("삭제", key="delete_button"):
-        delete_material_inventory_data(material_id)
-        st.rerun()
+        if st.button("삭제", key="delete_button"):
+            delete_material_inventory_data(material_id)
+            st.rerun()
 
     # 등록
     st.markdown(
