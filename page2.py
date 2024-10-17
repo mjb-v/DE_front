@@ -67,6 +67,8 @@ def page2_view():
             st.session_state['df'] = df
         else:
             st.warning("검색 결과가 없습니다.")
+            if 'df' in st.session_state:
+                del st.session_state['df']  # 검색 결과가 없을 때 세션에서 데이터 삭제
 
     if 'df' in st.session_state:
         df = st.session_state['df']

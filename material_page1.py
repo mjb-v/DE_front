@@ -140,11 +140,16 @@ def material_page1_view():
         selected_month = st.sidebar.selectbox("월 선택", list(range(1, 13)), index=list(range(1, 13)).index(current_month))
 
         df, df1 = get_all_plan(selected_year)
-        df2 = get_material_all_plan(selected_year, selected_month)
         st.subheader(f"{selected_year}년도 계획 및 실적 데이터")
         st.dataframe(df1)
-        st.subheader(f"{selected_year}년 {selected_month}월")
-        st.dataframe(df2)
+
+        df2 = get_material_all_plan(selected_year, selected_month)
+        if df2.empty:
+            pass
+        else:
+            st.subheader(f"{selected_year}년 {selected_month}월")
+            df2 = df2.drop(columns=['년도','월'])
+            st.dataframe(df2)
 
         # 그래프 --> 거래처 선택 & 해당 년도의 증감율만 보여주기
         business_achievement_rates = df["사업달성율"]

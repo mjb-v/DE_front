@@ -149,8 +149,6 @@ def page1_view():
         selected_month = st.sidebar.selectbox("월 선택", list(range(1, 13)), index=list(range(1, 13)).index(current_month))
 
         df = get_all_plan(selected_year)
-        df2 = get_monthly_plan(selected_year, selected_month)
-
         # 테이블 형식으로 변환 (month를 columns로, 나머지를 index로 변환, row 순서 정렬)
         df1 = df.set_index('월').T
         df1.columns = [f"{month}월" for month in df1.columns]
@@ -158,8 +156,14 @@ def page1_view():
         df1 = df1.reindex(row_order)
         st.subheader(f"{selected_year}년도 계획 및 실적 데이터")
         st.dataframe(df1)
-        st.subheader(f"{selected_year}년 {selected_month}월")
-        st.dataframe(df2)
+
+        df2 = get_monthly_plan(selected_year, selected_month)
+        if df2.empty:
+            pass
+        else:
+            st.subheader(f"{selected_year}년 {selected_month}월")
+            df2 = df2.drop(columns=['년도','월'])
+            st.dataframe(df2)
 
         # 그래프
         business_achievement_rates = df["사업달성율"]

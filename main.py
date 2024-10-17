@@ -81,18 +81,21 @@ st.sidebar.markdown(f"<div class='sidebar-company-status'>상태: {company_info[
 # 구분선 추가
 st.sidebar.markdown("<div class='divider'></div>", unsafe_allow_html=True)
 
-# 생산 관리 탭 섹션
+# 기본 탭 섹션
 if 'selected_tab' not in st.session_state:
     st.session_state.selected_tab = "생산 관리"
 
 # 탭 버튼 배치 (간격 조정을 위해 빈 컬럼 추가)
-col1, col2, _ = st.sidebar.columns([1, 1, 1])
+col1, col2, col3 = st.sidebar.columns([1, 1, 1])
 with col1:
     if st.button("생산 관리"):
         st.session_state.selected_tab = "생산 관리"
 with col2:
     if st.button("자재 관리"):
         st.session_state.selected_tab = "자재 관리"
+with col3:
+    if st.button("수요 예측"):
+        st.session_state.selected_tab = "수요 예측"
 
 selected_tab = st.session_state.selected_tab
 
@@ -123,3 +126,7 @@ elif selected_tab == "자재 관리":
         material_page3_view()
     elif page == "LOT재고관리":
         material_page4_view()
+
+elif selected_tab == "수요 예측":
+    st.sidebar.markdown("<div class='sidebar-section sidebar-title stButton'>수요 예측</div>", unsafe_allow_html=True)
+    

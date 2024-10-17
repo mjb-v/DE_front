@@ -133,19 +133,23 @@ def page3_view():
         st.subheader("실시간 가동 현황")
         table_placeholder = st.empty()
         chart_placeholder = st.empty()
-
-        while True:
-            df1 = get_real_time_status().drop(columns=['id', 'account_idx'])[
+        
+        today = datetime.today().strftime('%Y-%m-%d')
+        df1 = get_real_time_status()
+        if df1 is not None and not df1.empty:
+            while True:
+                df1 = get_real_time_status().drop(columns=['id', 'account_idx'])[
                 ["가동일자", "공정", "라인", "작업자", "근무조", "품번", "품명", "규격", "가동시간", "생산수량", "생산효율", "라인가동율"]
-            ]
-            df1['라인'] = pd.Categorical(df1['라인'], categories=[f"Line{i}" for i in range(1, 11)], ordered=True)
-            table_placeholder.dataframe(df1)
-            with chart_placeholder:
-                fig = plot1(df1)
-                st.pyplot(fig)
-                plt.close(fig)
-
-            time.sleep(5)
+                ]
+                df1['라인'] = pd.Categorical(df1['라인'], categories=[f"Line{i}" for i in range(1, 11)], ordered=True)
+                table_placeholder.dataframe(df1)
+                with chart_placeholder:
+                    fig = plot1(df1)
+                    st.pyplot(fig)
+                    plt.close(fig)
+                time.sleep(5)
+        else:
+            st.warning(f"오늘 날짜 ({today}) 에 대한 데이터가 없습니다.")
 
     elif tab == "연도별 효율 현황":
         st.sidebar.markdown("<div class='sidebar-section sidebar-subtitle'>필터 설정</div>", unsafe_allow_html=True)
