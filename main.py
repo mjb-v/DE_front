@@ -8,6 +8,7 @@ from material_page1 import material_page1_view
 from material_page2 import material_page2_view
 from material_page3 import material_page3_view
 from material_page4 import material_page4_view
+from prediction import prediction_view
 
 # 페이지 설정
 st.set_page_config(layout="wide")
@@ -129,4 +130,5 @@ elif selected_tab == "자재 관리":
 
 elif selected_tab == "수요 예측":
     st.sidebar.markdown("<div class='sidebar-section sidebar-title stButton'>수요 예측</div>", unsafe_allow_html=True)
-    
+    prediction_view()
+
