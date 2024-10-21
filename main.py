@@ -63,6 +63,10 @@ st.sidebar.markdown("""
             font-size: 16px;
             margin-bottom: 10px;
         }
+        .custom-line {
+            border-top: 1px solid #ccc;
+            margin: 2px 0;
+        }
         .divider {
             border-top: 2px solid #e6e6e6;
             margin: 20px 0;
