@@ -210,7 +210,6 @@ def edit_page():
 def material_page2_view():
     if 'page' not in st.session_state:
         st.session_state.page = 'main'
-
     if st.session_state.page == 'main':
         main_page()
     elif st.session_state.page == 'edit':

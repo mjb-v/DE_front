@@ -153,6 +153,7 @@ def page3_view():
             st.warning(f"오늘 날짜 ({today}) 에 대한 데이터가 없습니다.")
 
     elif tab == "연도별 효율 현황":
+        st.subheader("연도별 효율 현황")
         st.sidebar.markdown("<div class='sidebar-section sidebar-subtitle'>필터 설정</div>", unsafe_allow_html=True)
 
         current_year = datetime.today().year

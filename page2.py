@@ -45,7 +45,7 @@ def get_production_data(start_date, end_date, operator, item_number, item_name):
         st.error("데이터를 가져오는 데 실패했습니다.")
         return pd.DataFrame()
 
-# ----------------------------------------------------------------
+# ------------------------------------------------------------------------------------------------
 def page2_view():
     st.markdown("<h2 style='text-align: left;'>📈 생산 실적 관리</h2>", unsafe_allow_html=True)
     st.markdown("<hr style='border:1px solid #E0E0E0; margin: 2px 0 25px 0;'>", unsafe_allow_html=True)
@@ -73,7 +73,6 @@ def page2_view():
 
     if 'df' in st.session_state:
         df = st.session_state['df']
-        st.write("검색 결과:")
         st.dataframe(df)
         lines = natsorted(df['라인'].unique().tolist()) # 라인을 숫자로 정렬
 
@@ -83,9 +82,11 @@ def page2_view():
         num_columns = 4
         cols = st.columns(num_columns)
 
+        default_checked_lines = ["Line1", "Line2", "Line3"]
         for i, line in enumerate(lines):
             col = cols[i % num_columns]
-            if col.checkbox(f'{line}', value=True):
+            checked = line in default_checked_lines
+            if col.checkbox(f'{line}', value=checked):
                 selected_lines_efficiency.append(line)
         
         filtered_data_efficiency = df[df['라인'].isin(selected_lines_efficiency)]
@@ -107,9 +108,11 @@ def page2_view():
         selected_lines_equipment = []
         cols_equipment = st.columns(num_columns)
 
+        default_checked_lines = ["Line1", "Line2", "Line3"]
         for i, line in enumerate(lines):
             col = cols_equipment[i % num_columns]
-            if col.checkbox(f'{line}', value=True, key=f"equipment_{line}"):
+            checked = line in default_checked_lines
+            if col.checkbox(f'{line}', value=checked, key=f"equipment_{line}"):
                 selected_lines_equipment.append(line)
 
         filtered_data_equipment = df[df['라인'].isin(selected_lines_equipment)]
@@ -125,6 +128,3 @@ def page2_view():
         )
         fig_equipment.update_xaxes(tickformat='%b %d')
         st.plotly_chart(fig_equipment)
-
-if __name__ == "__main__":
-    page2_view()

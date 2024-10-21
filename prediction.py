@@ -84,7 +84,7 @@ def prediction_view():
     tab = st.sidebar.radio(" ", ["생산 수요 예측", "자재 수요 예측"])
 
     if tab == "생산 수요 예측":
-        st.markdown("<h2 style='text-align: left; color: #007BFF;'>🔮 생산 수요 예측</h2>", unsafe_allow_html=True)
+        st.markdown("<h2 style='text-align: left; color: #007BFF;'>🔍 생산 수요 예측</h2>", unsafe_allow_html=True)
         st.markdown("<hr style='border:1px solid #E0E0E0; margin: 2px 0 25px 0;'>", unsafe_allow_html=True)
 
         st.sidebar.markdown("<div class='sidebar-section sidebar-subtitle'>필터 설정</div>", unsafe_allow_html=True)
@@ -156,7 +156,7 @@ def prediction_view():
             st.plotly_chart(fig)
 
     elif tab == "자재 수요 예측":
-        st.markdown("<h2 style='text-align: left; color: #FF8C00;'>🔮 자재 수요 예측</h2>", unsafe_allow_html=True)
+        st.markdown("<h2 style='text-align: left; color: #FF8C00;'>🔍 자재 수요 예측</h2>", unsafe_allow_html=True)
         st.markdown("<hr style='border:1px solid #E0E0E0; margin: 2px 0 25px 0;'>", unsafe_allow_html=True)
 
         st.sidebar.markdown("<div class='sidebar-section sidebar-subtitle'>필터 설정</div>", unsafe_allow_html=True)
