@@ -128,7 +128,7 @@ def material_plan_form(date=None, client = "", item_number="", item_name="", ite
 
 # ----------------------------------------------------------------
 def material_page1_view():
-    st.markdown("<h2 style='text-align: left;'>📊 자재 계획 관리</h2>", unsafe_allow_html=True)
+    st.markdown("<h2 style='text-align: left;'>📝 자재 계획 관리</h2>", unsafe_allow_html=True)
     st.markdown("<hr style='border:1px solid #E0E0E0; margin: 2px 0 25px 0;'>", unsafe_allow_html=True)
 
     tab = st.sidebar.radio(" ", ["자재 계획 조회", "자재 계획 등록/수정"])

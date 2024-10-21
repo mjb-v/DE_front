@@ -92,7 +92,9 @@ def go_to_page(page_name):
 
 # 메인 페이지
 def main_page():
-    st.title("자재 입고 관리")
+    st.markdown("<h2 style='text-align: left;'>📥 자재 입고 관리</h2>", unsafe_allow_html=True)
+    st.markdown("<hr style='border:1px solid #E0E0E0; margin: 2px 0 25px 0;'>", unsafe_allow_html=True)
+
     df = get_material_inventory_data()
     df_display = df.drop(columns=["id", "account_idx"])
     st.dataframe(df_display)

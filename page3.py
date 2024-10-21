@@ -126,9 +126,10 @@ def plot2(df, selected_year):
 # ----------------------------------------------------------------
 
 def page3_view():
-    st.title("생산 현황 관리")
-    tab = st.sidebar.radio(" ", ["실시간 가동 현황", "연도별 효율 현황"])
+    st.markdown("<h2 style='text-align: left;'>📅 생산 현황 관리</h2>", unsafe_allow_html=True)
+    st.markdown("<hr style='border:1px solid #E0E0E0; margin: 2px 0 25px 0;'>", unsafe_allow_html=True)
 
+    tab = st.sidebar.radio(" ", ["실시간 가동 현황", "연도별 효율 현황"])
     if tab == "실시간 가동 현황":
         st.subheader("실시간 가동 현황")
         table_placeholder = st.empty()

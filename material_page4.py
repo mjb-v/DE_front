@@ -43,6 +43,8 @@ def get_material_LOT_inventory_data():
 
 # ----------------------------------------------------------------
 def material_page4_view():
-    st.title("LOT 재고 관리")
+    st.markdown("<h2 style='text-align: left;'>🔢 LOT 재고 관리</h2>", unsafe_allow_html=True)
+    st.markdown("<hr style='border:1px solid #E0E0E0; margin: 2px 0 25px 0;'>", unsafe_allow_html=True)
+
     df = get_material_LOT_inventory_data().drop(columns=["id", "account_idx"])
     st.dataframe(df)

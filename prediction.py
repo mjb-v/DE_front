@@ -74,15 +74,17 @@ def get_inven_predictions(forecast_months: int):
         st.error("데이터를 불러오는 데 실패했습니다.")
         return None
 
-def highlight_prediction(row):
-    return ['background-color: rgba(255, 99, 71, 0.2)']*len(row)
+def highlight_prod(row):
+    return ['background-color: #E3F2FD']*len(row)
+def highlight_inven(row):
+    return ['background-color: #FFF8E1']*len(row)
 
 # ------------------------------------------------------------------------------------------------
 def prediction_view():
     tab = st.sidebar.radio(" ", ["생산 수요 예측", "자재 수요 예측"])
 
     if tab == "생산 수요 예측":
-        st.markdown("<h2 style='text-align: left; color: #007BFF;'>📊 생산 수요 예측</h2>", unsafe_allow_html=True)
+        st.markdown("<h2 style='text-align: left; color: #007BFF;'>🔮 생산 수요 예측</h2>", unsafe_allow_html=True)
         st.markdown("<hr style='border:1px solid #E0E0E0; margin: 2px 0 25px 0;'>", unsafe_allow_html=True)
 
         st.sidebar.markdown("<div class='sidebar-section sidebar-subtitle'>필터 설정</div>", unsafe_allow_html=True)
@@ -106,7 +108,7 @@ def prediction_view():
         pred_df = get_prod_predictions(forecast_months)
         if pred_df is not None:
             st.subheader(f"{forecast_months}개월 예측 데이터")
-            st.dataframe(pred_df.style.apply(highlight_prediction, axis=1).set_properties(**{'text-align': 'center'}))
+            st.dataframe(pred_df.style.apply(highlight_prod, axis=1).set_properties(**{'text-align': 'center'}))
             st.download_button(label="CSV로 다운로드", data=pred_df.to_csv(), file_name="예측보고서.csv", mime="text/csv")
         st.markdown("<hr style='border:1px solid #E0E0E0;'>", unsafe_allow_html=True)
 
@@ -137,8 +139,8 @@ def prediction_view():
                 y=pred_df_with_last_value.iloc[0], 
                 mode='lines+markers', 
                 name='예측 데이터',
-                line=dict(color='orange', dash='dash', width=3),
-                marker=dict(color='orange', size=8)
+                line=dict(color='#20B2AA', dash='dash', width=3),
+                marker=dict(color='#20B2AA', size=8)
             ))
 
             fig.update_layout(
@@ -154,7 +156,7 @@ def prediction_view():
             st.plotly_chart(fig)
 
     elif tab == "자재 수요 예측":
-        st.markdown("<h2 style='text-align: left; color: #ff4747;'>📊 자재 수요 예측</h2>", unsafe_allow_html=True)
+        st.markdown("<h2 style='text-align: left; color: #FF8C00;'>🔮 자재 수요 예측</h2>", unsafe_allow_html=True)
         st.markdown("<hr style='border:1px solid #E0E0E0; margin: 2px 0 25px 0;'>", unsafe_allow_html=True)
 
         st.sidebar.markdown("<div class='sidebar-section sidebar-subtitle'>필터 설정</div>", unsafe_allow_html=True)
@@ -178,7 +180,7 @@ def prediction_view():
         pred_df = get_inven_predictions(forecast_months)
         if pred_df is not None:
             st.subheader(f"{forecast_months}개월 예측 데이터")
-            st.dataframe(pred_df.style.apply(highlight_prediction, axis=1).set_properties(**{'text-align': 'center'}))
+            st.dataframe(pred_df.style.apply(highlight_inven, axis=1).set_properties(**{'text-align': 'center'}))
             st.download_button(label="CSV로 다운로드", data=pred_df.to_csv(), file_name="예측보고서.csv", mime="text/csv")
         st.markdown("<hr style='border:1px solid #E0E0E0;'>", unsafe_allow_html=True)
 
@@ -196,8 +198,8 @@ def prediction_view():
             # 현재 데이터 그래프
             fig.add_trace(go.Scatter(x=df_existing.columns, y=df_existing.iloc[0],
                                     mode='lines+markers', name='현재 데이터',
-                                    line=dict(color='#007BFF', width=3),
-                                    marker=dict(color='#007BFF', size=8)))
+                                    line=dict(color='#FF8C00', width=3),
+                                    marker=dict(color='#FF8C00', size=8)))
 
             # 예측 데이터 그래프
             pred_df_with_last_value = pred_df.copy()
@@ -209,8 +211,8 @@ def prediction_view():
                 y=pred_df_with_last_value.iloc[0], 
                 mode='lines+markers', 
                 name='예측 데이터',
-                line=dict(color='orange', dash='dash', width=3),
-                marker=dict(color='orange', size=8)
+                line=dict(color='#FFD700', dash='dash', width=3),
+                marker=dict(color='#FFD700', size=8)
             ))
 
             fig.update_layout(

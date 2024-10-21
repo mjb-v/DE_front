@@ -47,7 +47,8 @@ def get_production_data(start_date, end_date, operator, item_number, item_name):
 
 # ----------------------------------------------------------------
 def page2_view():
-    st.title("생산 실적 관리")
+    st.markdown("<h2 style='text-align: left;'>📈 생산 실적 관리</h2>", unsafe_allow_html=True)
+    st.markdown("<hr style='border:1px solid #E0E0E0; margin: 2px 0 25px 0;'>", unsafe_allow_html=True)
 
     st.sidebar.markdown("<div class='sidebar-section sidebar-subtitle'>필터 설정</div>", unsafe_allow_html=True)
     today = datetime.today()
