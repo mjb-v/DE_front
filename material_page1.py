@@ -43,11 +43,11 @@ def translate_data(data):
 
 # 1-1. 위 - 전체 플랜 GET
 def get_all_plan(year: int):
-    response = requests.get(f"{API_URL}/plans/rate/{year}")
+    response = requests.get(f"{API_URL}/material/rate/{year}")
     if response.status_code == 200:
         data = response.json()
         df = translate_data(data)
-        df = df.drop(columns=["년도", "prod_plan", "prod_amount", "production_achievement_rate"])
+        df = df.drop(columns=["년도"])
         df_pivot = df.set_index('월').T
         df_pivot.columns = [f"{month}월" for month in df_pivot.columns]
         row_order = ["사업계획", "사업실적", "사업달성율"]
@@ -128,7 +128,9 @@ def material_plan_form(date=None, client = "", item_number="", item_name="", ite
 
 # ----------------------------------------------------------------
 def material_page1_view():
-    st.title("자재 계획 관리")
+    st.markdown("<h2 style='text-align: left;'>📊 자재 계획 관리</h2>", unsafe_allow_html=True)
+    st.markdown("<hr style='border:1px solid #E0E0E0; margin: 2px 0 25px 0;'>", unsafe_allow_html=True)
+
     tab = st.sidebar.radio(" ", ["자재 계획 조회", "자재 계획 등록/수정"])
 
     if tab == "자재 계획 조회":

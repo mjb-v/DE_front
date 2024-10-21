@@ -136,7 +136,9 @@ def production_plan_form(year=2024, month=10, item_number="", item_name="", mode
 # ------------------------------------------------------------------------------------
 
 def page1_view():
-    st.title("생산 계획 관리")
+    st.markdown("<h2 style='text-align: left;'>📊 생산 계획 관리</h2>", unsafe_allow_html=True)
+    st.markdown("<hr style='border:1px solid #E0E0E0; margin: 2px 0 25px 0;'>", unsafe_allow_html=True)
+
     tab = st.sidebar.radio(" ", ["생산 계획 조회", "생산 계획 등록/수정"])
 
     # 1. 생산 계획 조회 페이지
