@@ -45,7 +45,7 @@ def translate_data(data):
     return pd.DataFrame(data).rename(columns=translation_dict)
 
 # 1. GET 실시간 가동 현황 데이터
-def get_real_time_status(date=None):
+def get_real_time_status(date='2024-09-27'):
     # 실시간을 위해 오늘 날짜로 설정
     if date is None:
         date = datetime.today().strftime('%Y-%m-%d')
@@ -135,7 +135,6 @@ def page3_view():
         table_placeholder = st.empty()
         chart_placeholder = st.empty()
         
-        today = datetime.today().strftime('%Y-%m-%d')
         df1 = get_real_time_status()
         if df1 is not None and not df1.empty:
             while True:
@@ -150,6 +149,7 @@ def page3_view():
                     plt.close(fig)
                 time.sleep(5)
         else:
+            today = datetime.today().strftime('%Y-%m-%d')
             st.warning(f"오늘 날짜 ({today}) 에 대한 데이터가 없습니다.")
 
     elif tab == "연도별 효율 현황":

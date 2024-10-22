@@ -154,6 +154,9 @@ def prediction_view():
                 margin=dict(l=20, r=20, t=50, b=20)
             )
             st.plotly_chart(fig)
+        
+        st.markdown("<hr style='border:1px solid #E0E0E0; margin: 2px 0 2px 0;'>", unsafe_allow_html=True)
+        st.markdown("**Note:** 전체 생산 실적 데이터 기반 예측값입니다.")
 
     elif tab == "자재 수요 예측":
         st.markdown("<h2 style='text-align: left; color: #FF8C00;'>🔍 자재 수요 예측</h2>", unsafe_allow_html=True)
@@ -226,3 +229,6 @@ def prediction_view():
                 margin=dict(l=20, r=20, t=50, b=20)
             )
             st.plotly_chart(fig)
+
+        st.markdown("<hr style='border:1px solid #E0E0E0; margin: 2px 0 2px 0;'>", unsafe_allow_html=True)
+        st.markdown("**Note:** 전체 매입 실적 데이터 기반 예측값입니다.")
