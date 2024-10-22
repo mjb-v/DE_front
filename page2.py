@@ -89,15 +89,19 @@ def page2_view():
             if col.checkbox(f'{line}', value=checked):
                 selected_lines_efficiency.append(line)
         
+        # 날짜와 라인별 평균 생산효율 계산
         filtered_data_efficiency = df[df['라인'].isin(selected_lines_efficiency)]
+        grouped_data_efficiency = (
+            filtered_data_efficiency.groupby(['날짜', '라인'], as_index=False)
+            .agg({'생산효율': 'mean'})
+        )
 
         # 생산효율 그래프
         fig_efficiency = px.line(
-            filtered_data_efficiency, 
+            grouped_data_efficiency, 
             x='날짜', 
             y='생산효율', 
-            color='라인', 
-            title='라인별 생산효율',
+            color='라인',
             markers=True
         )
         fig_efficiency.update_xaxes(tickformat='%b %d')
@@ -118,13 +122,14 @@ def page2_view():
         filtered_data_equipment = df[df['라인'].isin(selected_lines_equipment)]
 
         # 설비효율 그래프
-        fig_equipment = px.line(
+        fig_equipment = px.box(
             filtered_data_equipment, 
             x='날짜', 
             y='설비효율', 
-            color='라인', 
-            title='라인별 설비효율',
-            markers=True
+            color='라인',
         )
         fig_equipment.update_xaxes(tickformat='%b %d')
         st.plotly_chart(fig_equipment)
+
+    st.markdown("<hr style='border:1px solid #E0E0E0; margin: 2px 0 2px 0;'>", unsafe_allow_html=True)
+    st.markdown("**Note:** 그래프는 각 날짜의 라인별 평균 생산효율과 설비효율을 계산한 값입니다.")
