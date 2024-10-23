@@ -162,5 +162,12 @@ def page3_view():
         df2 = get_efficiency_status(selected_year).drop(columns=["year"])
         df2_pivot = df2.set_index('월').T
         df2_pivot.columns = [f"{month}월" for month in df2_pivot.columns]
+        st.markdown("""
+            <style>
+            .dataframe {
+                width: 80% !important;
+            }
+            </style>
+            """, unsafe_allow_html=True)
         st.dataframe(df2_pivot.style.set_properties(**{'width': '10px'}))
         plot2(df2, selected_year)
