@@ -74,31 +74,31 @@ def page2_view():
     if 'df' in st.session_state:
         df = st.session_state['df']
         st.dataframe(df)
-        lines = natsorted(df['라인'].unique().tolist()) # 라인을 숫자로 정렬
+        lines = natsorted(df['라인'].unique().tolist())  # 라인을 숫자로 정렬
         num_columns = 4
 
-        on = st.toggle("라인별 평균 효율 보기")
+        # < 생산효율 >
+        on_production = st.toggle("평균 생산효율 보기", value=True)
 
-        if on: # 라인별 평균 생산효율
-            st.subheader('라인별 평균 생산효율')  # 라인별 체크박스 가로로 배치
-            selected_lines_efficiency = []
-            cols = st.columns(num_columns)
+        selected_lines_efficiency = []
+        cols = st.columns(num_columns)
+        default_checked_lines = ["Line1", "Line2", "Line3"]
 
-            default_checked_lines = ["Line1", "Line2", "Line3"]
-            for i, line in enumerate(lines):
-                col = cols[i % num_columns]
-                checked = line in default_checked_lines
-                if col.checkbox(f'{line}', value=checked):
-                    selected_lines_efficiency.append(line)
-            
-            # 날짜와 라인별 평균 생산효율 계산
+        for i, line in enumerate(lines):
+            col = cols[i % num_columns]
+            checked = line in default_checked_lines
+            if col.checkbox(f'{line}', value=checked, key=f"line_production_{line}"):
+                selected_lines_efficiency.append(line)
+
+        if on_production:  # 토글 ON: 평균 생산효율 라인 그래프
+            st.subheader('라인별 평균 생산효율')
+
             filtered_data_efficiency = df[df['라인'].isin(selected_lines_efficiency)]
             grouped_data_efficiency = (
                 filtered_data_efficiency.groupby(['날짜', '라인'], as_index=False)
                 .agg({'생산효율': 'mean'})
             )
 
-            # 생산효율 그래프
             fig_efficiency = px.line(
                 grouped_data_efficiency, 
                 x='날짜', 
@@ -108,56 +108,66 @@ def page2_view():
             )
             fig_efficiency.update_xaxes(tickformat='%b %d')
             st.plotly_chart(fig_efficiency)
-        
-        else:
-            # 생산효율 박스플롯
-            st.subheader('라인별 생산효율')
-            selected_lines_efficiency = []
-            cols_equipment = st.columns(num_columns)
 
-            default_checked_lines = ["Line1", "Line2", "Line3"]
-            for i, line in enumerate(lines):
-                col = cols_equipment[i % num_columns]
-                checked = line in default_checked_lines
-                if col.checkbox(f'{line}', value=checked, key=f"production_{line}"):
-                    selected_lines_efficiency.append(line)
+        else:  # 토글 OFF: 생산효율 박스플롯
+            st.subheader('라인별 생산효율')
 
             filtered_data_production = df[df['라인'].isin(selected_lines_efficiency)]
 
-            # 생산효율 그래프
-            fig_equipment = px.box(
+            fig_production = px.box(
                 filtered_data_production, 
+                x='날짜', 
+                y='생산효율', 
+                color='라인',
+            )
+            fig_production.update_xaxes(tickformat='%b %d')
+            st.plotly_chart(fig_production)
+
+
+        # < 설비효율 >
+        on_equipment = st.toggle("평균 설비효율 보기", value=True)
+
+        selected_lines_equipment = []
+        cols_equipment = st.columns(num_columns)
+
+        for i, line in enumerate(lines):
+            col = cols_equipment[i % num_columns]
+            checked = line in default_checked_lines
+            if col.checkbox(f'{line}', value=checked, key=f"line_equipment_{line}"):
+                selected_lines_equipment.append(line)
+
+        if on_equipment:  # 토글 ON: 평균 설비효율 라인 그래프
+            st.subheader('라인별 평균 설비효율')
+
+            filtered_data_equipment = df[df['라인'].isin(selected_lines_equipment)]
+            grouped_data_equipment = (
+                filtered_data_equipment.groupby(['날짜', '라인'], as_index=False)
+                .agg({'설비효율': 'mean'})
+            )
+
+            fig_equipment = px.line(
+                grouped_data_equipment, 
                 x='날짜', 
                 y='설비효율', 
                 color='라인',
+                markers=True
             )
             fig_equipment.update_xaxes(tickformat='%b %d')
             st.plotly_chart(fig_equipment)
 
+        else:  # 토글 OFF: 설비효율 박스플롯
+            st.subheader('라인별 설비효율')
 
-        # 라인별 체크박스 - 설비효율
-        st.subheader('라인별 설비효율')
-        selected_lines_equipment = []
-        cols_equipment = st.columns(num_columns)
+            filtered_data_equipment = df[df['라인'].isin(selected_lines_equipment)]
 
-        default_checked_lines = ["Line1", "Line2", "Line3"]
-        for i, line in enumerate(lines):
-            col = cols_equipment[i % num_columns]
-            checked = line in default_checked_lines
-            if col.checkbox(f'{line}', value=checked, key=f"equipment_{line}"):
-                selected_lines_equipment.append(line)
-
-        filtered_data_equipment = df[df['라인'].isin(selected_lines_equipment)]
-
-        # 설비효율 그래프
-        fig_equipment = px.box(
-            filtered_data_equipment, 
-            x='날짜', 
-            y='설비효율', 
-            color='라인',
-        )
-        fig_equipment.update_xaxes(tickformat='%b %d')
-        st.plotly_chart(fig_equipment)
+            fig_equipment_box = px.box(
+                filtered_data_equipment, 
+                x='날짜', 
+                y='설비효율', 
+                color='라인',
+            )
+            fig_equipment_box.update_xaxes(tickformat='%b %d')
+            st.plotly_chart(fig_equipment_box)
 
     st.markdown("<hr style='border:1px solid #E0E0E0; margin: 2px 0 2px 0;'>", unsafe_allow_html=True)
     st.markdown("**Note:** 그래프는 각 날짜의 라인별 평균 생산효율과 설비효율을 계산한 값입니다.")
