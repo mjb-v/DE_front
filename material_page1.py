@@ -8,6 +8,7 @@ import requests
 from datetime import datetime
 import os
 from dotenv import load_dotenv
+import time
 from get_companies_list import company_names
 
 font_path = 'NanumGothic-Regular.ttf'
@@ -43,6 +44,7 @@ def translate_data(data):
 
 # 1-1. 위 - 전체 플랜 GET
 def get_all_plan(year: int):
+    time.sleep(3)
     response = requests.get(f"{API_URL}/material/rate/{year}")
     if response.status_code == 200:
         data = response.json()
