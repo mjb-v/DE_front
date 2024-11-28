@@ -20,7 +20,7 @@ API_URL = os.getenv("API_URL")
 # 한글 컬럼명으로 변환
 def translate_data(data):
     translation_dict = {
-        "year": "년도",
+        "year": "연도",
         "month": "월",
         "business_plan": "사업계획",
         "business_amount": "사업실적",
@@ -46,7 +46,7 @@ def get_all_plan(year: int):
     if response.status_code == 200:
         data = response.json()
         df = translate_data(data)
-        df = df.drop(columns=["년도"])
+        df = df.drop(columns=["연도"])
         return df
     else:
         st.error("데이터를 불러오는 데 실패했습니다.")
@@ -75,8 +75,8 @@ def get_plan_register():
         df = translate_data(data)
 
         # '날짜' 컬럼 생성
-        df['날짜'] = df.apply(lambda row: f"{int(row['년도'])}-{int(row['월']):02d}", axis=1)
-        df = df.drop(columns=["년도", "월", "account_idx"])
+        df['날짜'] = df.apply(lambda row: f"{int(row['연도'])}-{int(row['월']):02d}", axis=1)
+        df = df.drop(columns=["연도", "월", "account_idx"])
 
         return df
     else:
@@ -120,7 +120,7 @@ def production_plan_form(year=2024, month=10, item_number="", item_name="", mode
 
     col1, col2 = st.columns([1, 1])
     with col1:
-        year = st.selectbox("년도", options=list(range(2014, 2100)), index=year - 2014, key=f"year_{form_key}")
+        year = st.selectbox("연도", options=list(range(2014, 2100)), index=year - 2014, key=f"year_{form_key}")
     with col2:
         month = st.selectbox("월", options=list(range(1, 13)), index=month - 1, key=f"month_{form_key}")
 
@@ -147,7 +147,7 @@ def page1_view():
 
         current_year = datetime.today().year
         current_month = datetime.today().month
-        selected_year = st.sidebar.selectbox("년도 선택", list(range(2014, 2025)), index=list(range(2014, 2025)).index(current_year))
+        selected_year = st.sidebar.selectbox("연도 선택", list(range(2014, 2025)), index=list(range(2014, 2025)).index(current_year))
         selected_month = st.sidebar.selectbox("월 선택", list(range(1, 13)), index=list(range(1, 13)).index(current_month))
 
         df = get_all_plan(selected_year)
@@ -164,7 +164,7 @@ def page1_view():
             pass
         else:
             st.subheader(f"{selected_year}년 {selected_month}월")
-            df2 = df2.drop(columns=['년도','월'])
+            df2 = df2.drop(columns=['연도','월'])
             st.dataframe(df2)
 
         # 그래프
@@ -188,7 +188,7 @@ def page1_view():
     elif tab == "생산 계획 등록/수정":
         df = get_plan_register()
         if not df.empty:
-            df_display = df.drop(columns=["id"])[['날짜', '품번', '품명', '모델', '단가', '생산계획', '공정']]
+            df_display = df.drop(columns=["plan_idx"])[['날짜', '품번', '품명', '모델', '단가', '생산계획', '공정']]
             st.dataframe(df_display)
 
         # 수정/삭제할 행 선택 및 버튼 배치
@@ -200,7 +200,7 @@ def page1_view():
 
         with col2:
             selected_row = df.loc[selected_index]
-            prod_id = selected_row["id"]
+            prod_id = selected_row["plan_idx"]
 
             # 수정 버튼
             if st.button("수정", key="edit_button"):

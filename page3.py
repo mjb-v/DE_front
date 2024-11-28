@@ -129,44 +129,53 @@ def page3_view():
     st.markdown("<hr style='border:1px solid #E0E0E0; margin: 2px 0 25px 0;'>", unsafe_allow_html=True)
 
     tab = st.sidebar.radio(" ", ["실시간 가동 현황", "연도별 효율 현황"])
+
     if tab == "실시간 가동 현황":
         st.subheader("실시간 가동 현황")
         table_placeholder = st.empty()
         chart_placeholder = st.empty()
-        
-        df1 = get_real_time_status()
-        if df1 is not None and not df1.empty:
-            while True:
-                df1 = get_real_time_status().drop(columns=['id', 'account_idx'])[
-                ["가동일자", "공정", "라인", "작업자", "근무조", "품번", "품명", "규격", "가동시간", "생산수량", "생산효율", "라인가동율"]
+
+        try:
+            df1 = get_real_time_status()
+            
+            if df1 is not None and not df1.empty:
+                df1 = df1.drop(columns=['production_idx', 'account_idx'], errors='ignore')[  # KeyError 방지를 위해 errors='ignore' 사용
+                    ["가동일자", "공정", "라인", "작업자", "근무조", "품번", "품명", "규격", "가동시간", "생산수량", "생산효율", "라인가동율"]
                 ]
                 df1['라인'] = pd.Categorical(df1['라인'], categories=[f"Line{i}" for i in range(1, 11)], ordered=True)
                 table_placeholder.dataframe(df1)
-                with chart_placeholder:
-                    fig = plot1(df1)
-                    st.pyplot(fig)
-                    plt.close(fig)
-                time.sleep(5)
-        else:
-            today = datetime.today().strftime('%Y-%m-%d')
-            st.warning(f"오늘 날짜 ({today}) 에 대한 데이터가 없습니다.")
+
+                # 그래프
+                fig = plot1(df1)
+                chart_placeholder.pyplot(fig)
+            else:
+                today = datetime.today().strftime('%Y-%m-%d')
+                st.warning(f"오늘 날짜 ({today}) 에 대한 데이터가 없습니다.")
+
+        except Exception as e:
+            st.error("오류가 발생했습니다.")
+            st.warning(f"세부 오류 메시지: {str(e)}")
 
     elif tab == "연도별 효율 현황":
         st.subheader("연도별 효율 현황")
         st.sidebar.markdown("<div class='sidebar-section sidebar-subtitle'>필터 설정</div>", unsafe_allow_html=True)
 
         current_year = datetime.today().year
-        selected_year = st.sidebar.selectbox("년도 선택", list(range(2014, 2025)), index=list(range(2014, 2025)).index(current_year))
+        selected_year = st.sidebar.selectbox("연도 선택", list(range(2014, 2025)), index=list(range(2014, 2025)).index(current_year))
 
-        df2 = get_efficiency_status(selected_year).drop(columns=["year"])
-        df2_pivot = df2.set_index('월').T
-        df2_pivot.columns = [f"{month}월" for month in df2_pivot.columns]
-        st.markdown("""
-            <style>
-            .dataframe {
-                width: 80% !important;
-            }
-            </style>
-            """, unsafe_allow_html=True)
-        st.dataframe(df2_pivot.style.set_properties(**{'width': '10px'}))
-        plot2(df2, selected_year)
+        df2 = get_efficiency_status(selected_year)
+        if df2 is not None and not df2.empty:
+            df2 = df2.drop(columns=["year"])
+            df2_pivot = df2.set_index('월').T
+            df2_pivot.columns = [f"{month}월" for month in df2_pivot.columns]
+            st.markdown("""
+                <style>
+                .dataframe {
+                    width: 80% !important;
+                }
+                </style>
+                """, unsafe_allow_html=True)
+            st.dataframe(df2_pivot.style.set_properties(**{'width': '10px'}))
+            plot2(df2, selected_year)
+        else:
+            st.warning(f"{selected_year}년도에 대한 데이터가 없습니다.")       

@@ -52,12 +52,12 @@ def page4_view():
 
     current_year = datetime.today().year
     current_month = datetime.today().month
-    selected_year = st.sidebar.selectbox("년도 선택", list(range(2014, 2025)), index=list(range(2014, 2025)).index(current_year))
+    selected_year = st.sidebar.selectbox("연도 선택", list(range(2014, 2025)), index=list(range(2014, 2025)).index(current_year))
     selected_month = st.sidebar.selectbox("월 선택", list(range(1, 13)), index=list(range(1, 13)).index(current_month))
 
     df = get_inventory_data(selected_year, selected_month)
     if df is not None and not df.empty:
-        df = df.drop(columns=["id", "account_idx"], errors="ignore")
+        df = df.drop(columns=["inventory_idx", "account_idx"], errors="ignore")
         st.subheader(f"{selected_year}년 {selected_month}월")
         st.dataframe(df)
     else:
