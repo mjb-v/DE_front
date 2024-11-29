@@ -8,6 +8,7 @@ import requests
 from datetime import datetime
 import os
 from dotenv import load_dotenv
+import time
 
 font_path = 'NanumGothic-Regular.ttf'
 font_manager.fontManager.addfont(font_path)
@@ -40,17 +41,22 @@ def translate_data(data):
     }
     return pd.DataFrame(data).rename(columns=translation_dict)
 
-# 1-1. GET 전체 생산 계획 리스트 불러오기 및 가공
-def get_all_plan(year: int):
-    response = requests.get(f"{API_URL}/plans/rate/{year}")
-    if response.status_code == 200:
-        data = response.json()
-        df = translate_data(data)
-        df = df.drop(columns=["연도"])
-        return df
-    else:
-        st.error("데이터를 불러오는 데 실패했습니다.")
-        return None
+# 1-1. GET 전체 생산 계획 리스트 불러오기 및 가공 ---> 초기 실행 오류 보완, 재시도 및 안정성
+@st.cache_data
+def get_all_plan(year: int, retries=3, delay=5):
+    for i in range(retries):
+        try:
+            response = requests.get(f"{API_URL}/plans/rate/{year}", timeout=10)
+            response.raise_for_status()
+            data = response.json()
+            df = translate_data(data)
+            df = df.drop(columns=["연도"])
+            return df
+        except requests.exceptions.RequestException as e:
+            st.warning(f"데이터를 불러오는데 실패했습니다. 재시도 중... ({i + 1}/{retries})")
+            time.sleep(delay)
+    st.error("데이터를 불러오는 데 실패했습니다. 나중에 다시 시도해주세요.")
+    return None
 
 # 1-2. 아래 - 당월 플랜
 def get_monthly_plan(year: int, month: int):
