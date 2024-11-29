@@ -79,6 +79,9 @@ def highlight_prod(row):
 def highlight_inven(row):
     return ['background-color: #FFF8E1']*len(row)
 
+
+# 시계열분석법 선택 탭 추가 - 지수평활법 arima 이동평균법
+
 # ------------------------------------------------------------------------------------------------
 def prediction_view():
     tab = st.sidebar.radio(" ", ["생산 수요 예측", "자재 수요 예측"])
