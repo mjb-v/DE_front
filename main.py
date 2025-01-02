@@ -11,7 +11,11 @@ from material_page4 import material_page4_view
 from prediction import prediction_view
 
 # 페이지 설정
-st.set_page_config(layout="wide")
+st.set_page_config(
+    page_title="제조 혁신",
+    page_icon="🌟",
+    layout="wide"
+)
 
 # 한글 폰트 설정
 font_path = 'NanumGothic-Regular.ttf'

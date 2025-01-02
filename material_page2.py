@@ -96,7 +96,7 @@ def main_page():
     st.markdown("<hr style='border:1px solid #E0E0E0; margin: 2px 0 25px 0;'>", unsafe_allow_html=True)
 
     df = get_material_inventory_data()
-    df_display = df.drop(columns=["id", "account_idx"])
+    df_display = df.drop(columns=["materialinout_idx", "account_idx"])
     st.dataframe(df_display)
 
     col1, col2 = st.columns([2, 1])
@@ -104,7 +104,7 @@ def main_page():
             selected_index = st.selectbox("수정/삭제할 줄의 번호 선택", df.index, key="select_index")
     with col2:
         selected_row = df.loc[selected_index]
-        material_id = selected_row["id"]
+        material_id = selected_row["materialinout_idx"]
 
         st.session_state.selected_row = selected_row
         st.session_state.material_id = material_id

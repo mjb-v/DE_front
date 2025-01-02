@@ -16,6 +16,7 @@ rc('font', family='NanumGothic')
 load_dotenv()
 API_URL = os.getenv("API_URL")
 
+# 1. 생산 실적
 def get_prod_plan(year: int):
     response = requests.get(f"{API_URL}/plans/rate/{year}")
     if response.status_code == 200:
@@ -30,6 +31,7 @@ def get_prod_plan(year: int):
         st.error("데이터를 불러오는 데 실패했습니다.")
         return None
 
+# 2. 자재 실적
 def get_inven_plan(year: int):
     response = requests.get(f"{API_URL}/material/rate/{year}")
     if response.status_code == 200:
@@ -44,7 +46,8 @@ def get_inven_plan(year: int):
         st.error("데이터를 불러오는 데 실패했습니다.")
         return None
 
-def get_prod_predictions(forecast_months: int):
+# 3-1. 생산 예측: 지수평활법
+def get_prod_ES_predictions(forecast_months: int):
     params = {'forecast_months': forecast_months}
     response = requests.get(f"{API_URL}/productions/predict/", params=params)
     if response.status_code == 200:
@@ -59,7 +62,72 @@ def get_prod_predictions(forecast_months: int):
         st.error("데이터를 불러오는 데 실패했습니다.")
         return None
 
-def get_inven_predictions(forecast_months: int):
+# 3-2. 생산 예측: ARIMA
+def get_prod_ARIMA_predictions(forecast_months: int):
+    params = {'forecast_months': forecast_months}
+    response = requests.get(f"{API_URL}/productions/predict/", params=params)
+    if response.status_code == 200:
+        data = response.json()
+        pred_df = pd.DataFrame(data['predicted_productions']).rename(columns={"date": "날짜", "month_quantity": "생산 실적"})
+
+        # 반올림, 쉼표 추가
+        pred_df["생산 실적"] = pred_df["생산 실적"].round().astype(int).apply(lambda x: f"{x:,}")
+        pred_df = pred_df[["날짜", "생산 실적"]].set_index("날짜").transpose()  
+        return pred_df
+    else:
+        st.error("데이터를 불러오는 데 실패했습니다.")
+        return None
+
+# 3-3. 생산 예측: 이동평균법
+def get_prod_MA_predictions(forecast_months: int):
+    params = {'forecast_months': forecast_months}
+    response = requests.get(f"{API_URL}/productions/predict/", params=params)
+    if response.status_code == 200:
+        data = response.json()
+        pred_df = pd.DataFrame(data['predicted_productions']).rename(columns={"date": "날짜", "month_quantity": "생산 실적"})
+
+        # 반올림, 쉼표 추가
+        pred_df["생산 실적"] = pred_df["생산 실적"].round().astype(int).apply(lambda x: f"{x:,}")
+        pred_df = pred_df[["날짜", "생산 실적"]].set_index("날짜").transpose()  
+        return pred_df
+    else:
+        st.error("데이터를 불러오는 데 실패했습니다.")
+        return None
+
+# 4-1. 자재 예측: 지수평활법
+def get_inven_ES_predictions(forecast_months: int):
+    params = {'forecast_months': forecast_months}
+    response = requests.get(f"{API_URL}/material_invens/predict/", params=params)
+    if response.status_code == 200:
+        data = response.json()
+        pred_df = pd.DataFrame(data['predicted_material_invens']).rename(columns={"date": "날짜", "month_amount": "매입 실적"})
+
+        # 반올림, 쉼표 추가
+        pred_df["매입 실적"] = pred_df["매입 실적"].round().astype(int).apply(lambda x: f"{x:,}")
+        pred_df = pred_df[["날짜", "매입 실적"]].set_index("날짜").transpose()  
+        return pred_df
+    else:
+        st.error("데이터를 불러오는 데 실패했습니다.")
+        return None
+
+# 4-2. 자재 예측: ARIMA
+def get_inven_ARIMA_predictions(forecast_months: int):
+    params = {'forecast_months': forecast_months}
+    response = requests.get(f"{API_URL}/material_invens/predict/", params=params)
+    if response.status_code == 200:
+        data = response.json()
+        pred_df = pd.DataFrame(data['predicted_material_invens']).rename(columns={"date": "날짜", "month_amount": "매입 실적"})
+
+        # 반올림, 쉼표 추가
+        pred_df["매입 실적"] = pred_df["매입 실적"].round().astype(int).apply(lambda x: f"{x:,}")
+        pred_df = pred_df[["날짜", "매입 실적"]].set_index("날짜").transpose()  
+        return pred_df
+    else:
+        st.error("데이터를 불러오는 데 실패했습니다.")
+        return None
+
+# 4-3. 자재 예측: 이동평균법
+def get_inven_MA_predictions(forecast_months: int):
     params = {'forecast_months': forecast_months}
     response = requests.get(f"{API_URL}/material_invens/predict/", params=params)
     if response.status_code == 200:
@@ -79,14 +147,30 @@ def highlight_prod(row):
 def highlight_inven(row):
     return ['background-color: #FFF8E1']*len(row)
 
+# 시계열분석법 선택 탭 추가 - [지수평활법, ARIMA, 이동평균법]
+
 # ------------------------------------------------------------------------------------------------
 def prediction_view():
     tab = st.sidebar.radio(" ", ["생산 수요 예측", "자재 수요 예측"])
 
     if tab == "생산 수요 예측":
-        st.markdown("<h2 style='text-align: left; color: #007BFF;'>🔍 생산 수요 예측</h2>", unsafe_allow_html=True)
-        st.markdown("<hr style='border:1px solid #E0E0E0; margin: 2px 0 25px 0;'>", unsafe_allow_html=True)
+        col1, col2, col3 = st.columns([9, 1, 3])
+        with col1:
+            st.markdown("<h2 style='text-align: left; color: #007BFF;'>🔍 생산 수요 예측</h2>", unsafe_allow_html=True)
+        with col2:
+            st.markdown(
+                """
+                <style>
+                .custom-bold-text {
+                    font-weight: bold;
+                    margin: 35px 0px 0px 25px;
+                }
+                </style>
+                <div class="custom-bold-text">예측 방법:</div>""", unsafe_allow_html=True)
+        with col3:
+            method = st.selectbox(" ", ["지수평활법", "이동평균법", "ARIMA"], index=0)
 
+        st.markdown("<hr style='border:1px solid #E0E0E0; margin: 2px 0 25px 0;'>", unsafe_allow_html=True)
         st.sidebar.markdown("<div class='sidebar-section sidebar-subtitle'>필터 설정</div>", unsafe_allow_html=True)
         current_year = datetime.today().year
         selected_year = st.sidebar.selectbox("년도 선택", list(range(2014, 2025)), index=list(range(2014, 2025)).index(current_year))
@@ -105,7 +189,16 @@ def prediction_view():
 
         # 예측 데이터
         forecast_months = st.slider("예측 기간 선택", min_value=1, max_value=12, value=3)
-        pred_df = get_prod_predictions(forecast_months)
+
+        if method == "지수평활법":
+            pred_df = get_prod_ES_predictions(forecast_months)
+        elif method == "이동평균법":
+            pred_df = get_prod_MA_predictions(forecast_months)
+        elif method == "ARIMA":
+            pred_df = get_prod_ARIMA_predictions(forecast_months)
+        else:
+            pred_df = None
+
         if pred_df is not None:
             st.subheader(f"{forecast_months}개월 예측 데이터")
             st.dataframe(pred_df.style.apply(highlight_prod, axis=1).set_properties(**{'text-align': 'center'}))
@@ -158,10 +251,25 @@ def prediction_view():
         st.markdown("<hr style='border:1px solid #E0E0E0; margin: 2px 0 2px 0;'>", unsafe_allow_html=True)
         st.markdown("**Note:** 전체 생산 실적 데이터 기반 예측값입니다.")
 
+# ------------------------------------------------------------------------------------------------------------------------
     elif tab == "자재 수요 예측":
-        st.markdown("<h2 style='text-align: left; color: #FF8C00;'>🔍 자재 수요 예측</h2>", unsafe_allow_html=True)
-        st.markdown("<hr style='border:1px solid #E0E0E0; margin: 2px 0 25px 0;'>", unsafe_allow_html=True)
+        col1, col2, col3 = st.columns([9, 1, 3])
+        with col1:
+            st.markdown("<h2 style='text-align: left; color: #FF8C00;'>🔍 자재 수요 예측</h2>", unsafe_allow_html=True)
+        with col2:
+            st.markdown(
+                """
+                <style>
+                .custom-bold-text {
+                    font-weight: bold;
+                    margin: 35px 0px 0px 25px;
+                }
+                </style>
+                <div class="custom-bold-text">예측 방법:</div>""", unsafe_allow_html=True)
+        with col3:
+            method = st.selectbox(" ", ["지수평활법", "이동평균법", "ARIMA"], index=0)
 
+        st.markdown("<hr style='border:1px solid #E0E0E0; margin: 2px 0 25px 0;'>", unsafe_allow_html=True)
         st.sidebar.markdown("<div class='sidebar-section sidebar-subtitle'>필터 설정</div>", unsafe_allow_html=True)
         current_year = datetime.today().year
         selected_year = st.sidebar.selectbox("년도 선택", list(range(2014, 2025)), index=list(range(2014, 2025)).index(current_year))
@@ -180,7 +288,16 @@ def prediction_view():
 
         # 예측 데이터
         forecast_months = st.slider("예측 기간 선택", min_value=1, max_value=12, value=3)
-        pred_df = get_inven_predictions(forecast_months)
+
+        if method == "지수평활법":
+            pred_df = get_inven_ES_predictions(forecast_months)
+        elif method == "이동평균법":
+            pred_df = get_inven_MA_predictions(forecast_months)
+        elif method == "ARIMA":
+            pred_df = get_inven_ARIMA_predictions(forecast_months)
+        else:
+            pred_df = None
+
         if pred_df is not None:
             st.subheader(f"{forecast_months}개월 예측 데이터")
             st.dataframe(pred_df.style.apply(highlight_inven, axis=1).set_properties(**{'text-align': 'center'}))
