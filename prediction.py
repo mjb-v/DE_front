@@ -174,7 +174,7 @@ def prediction_view():
         st.markdown("<hr style='border:1px solid #E0E0E0; margin: 2px 0 25px 0;'>", unsafe_allow_html=True)
         st.sidebar.markdown("<div class='sidebar-section sidebar-subtitle'>필터 설정</div>", unsafe_allow_html=True)
 
-        selected_year, selected_month = get_sidebar_filters()
+        selected_year = get_sidebar_filters(show_month=False)
         df = get_prod_plan(selected_year)
         if df is not None:
             st.subheader(f"{selected_year}년도 생산 실적")
@@ -206,8 +206,8 @@ def prediction_view():
         st.markdown("<hr style='border:1px solid #E0E0E0;'>", unsafe_allow_html=True)
 
         # 그래프: 현재 날짜 기준으로 지난 12개월 데이터만 추출
-        current_year_data = get_prod_plan(current_year)
-        last_year_data = get_prod_plan(current_year - 1)
+        current_year_data = get_prod_plan(selected_year)
+        last_year_data = get_prod_plan(selected_year - 1)
 
         if current_year_data is not None and last_year_data is not None and pred_df is not None:
             all_data_df = pd.concat([last_year_data, current_year_data], axis=1)
@@ -272,7 +272,7 @@ def prediction_view():
         st.markdown("<hr style='border:1px solid #E0E0E0; margin: 2px 0 25px 0;'>", unsafe_allow_html=True)
         st.sidebar.markdown("<div class='sidebar-section sidebar-subtitle'>필터 설정</div>", unsafe_allow_html=True)
 
-        selected_year, selected_month = get_sidebar_filters()
+        selected_year = get_sidebar_filters(show_month=False)
         df = get_inven_plan(selected_year)
         if df is not None:
             st.subheader(f"{selected_year}년도 매입 실적")
@@ -304,8 +304,8 @@ def prediction_view():
         st.markdown("<hr style='border:1px solid #E0E0E0;'>", unsafe_allow_html=True)
 
         # 그래프: 현재 날짜 기준으로 지난 12개월 데이터만 추출
-        current_year_data = get_inven_plan(current_year)
-        last_year_data = get_inven_plan(current_year - 1)
+        current_year_data = get_inven_plan(selected_year)
+        last_year_data = get_inven_plan(selected_year - 1)
 
         if current_year_data is not None and last_year_data is not None and pred_df is not None:
             all_data_df = pd.concat([last_year_data, current_year_data], axis=1)
