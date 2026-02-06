@@ -10,6 +10,7 @@ import os
 from dotenv import load_dotenv
 import time
 from get_companies_list import company_names
+from utils import get_sidebar_filters
 
 font_path = 'NanumGothic-Regular.ttf'
 font_manager.fontManager.addfont(font_path)
@@ -138,11 +139,7 @@ def material_page1_view():
     if tab == "자재 계획 조회":
         st.sidebar.markdown("<div class='sidebar-section sidebar-subtitle'>필터 설정</div>", unsafe_allow_html=True)
 
-        current_year = datetime.today().year
-        current_month = datetime.today().month
-        selected_year = st.sidebar.selectbox("연도 선택", list(range(2014, 2025)), index=list(range(2014, 2025)).index(current_year))
-        selected_month = st.sidebar.selectbox("월 선택", list(range(1, 13)), index=list(range(1, 13)).index(current_month))
-
+        selected_year, selected_month = get_sidebar_filters()
         df, df1 = get_all_plan(selected_year)
         st.subheader(f"{selected_year}년도 계획 및 실적 데이터")
         st.dataframe(df1)

@@ -6,6 +6,7 @@ import requests
 from datetime import datetime
 import os
 from dotenv import load_dotenv
+from utils import get_sidebar_filters
 
 # FastAPI URL
 load_dotenv()
@@ -50,11 +51,7 @@ def page4_view():
     st.markdown("<hr style='border:1px solid #E0E0E0; margin: 2px 0 25px 0;'>", unsafe_allow_html=True)
     st.sidebar.markdown("<div class='sidebar-section sidebar-subtitle'>필터 설정</div>", unsafe_allow_html=True)
 
-    current_year = datetime.today().year
-    current_month = datetime.today().month
-    selected_year = st.sidebar.selectbox("연도 선택", list(range(2014, 2025)), index=list(range(2014, 2025)).index(current_year))
-    selected_month = st.sidebar.selectbox("월 선택", list(range(1, 13)), index=list(range(1, 13)).index(current_month))
-
+    selected_year, selected_month = get_sidebar_filters()
     df = get_inventory_data(selected_year, selected_month)
     if df is not None and not df.empty:
         df = df.drop(columns=["inventory_idx", "account_idx"], errors="ignore")

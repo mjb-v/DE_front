@@ -7,6 +7,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 import os
 from dotenv import load_dotenv
+from utils import get_sidebar_filters
 
 font_path = 'NanumGothic-Regular.ttf'
 font_manager.fontManager.addfont(font_path)
@@ -172,13 +173,8 @@ def prediction_view():
 
         st.markdown("<hr style='border:1px solid #E0E0E0; margin: 2px 0 25px 0;'>", unsafe_allow_html=True)
         st.sidebar.markdown("<div class='sidebar-section sidebar-subtitle'>필터 설정</div>", unsafe_allow_html=True)
-        today_year = datetime.today().year
-        if today_year > 2024:
-            current_year = 2024
-        else:
-            current_year = today_year
-        selected_year = st.sidebar.selectbox("년도 선택", list(range(2014, 2025)), index=list(range(2014, 2025)).index(current_year))
 
+        selected_year, selected_month = get_sidebar_filters()
         df = get_prod_plan(selected_year)
         if df is not None:
             st.subheader(f"{selected_year}년도 생산 실적")
@@ -275,13 +271,8 @@ def prediction_view():
 
         st.markdown("<hr style='border:1px solid #E0E0E0; margin: 2px 0 25px 0;'>", unsafe_allow_html=True)
         st.sidebar.markdown("<div class='sidebar-section sidebar-subtitle'>필터 설정</div>", unsafe_allow_html=True)
-        today_year = datetime.today().year
-        if today_year > 2024:
-            current_year = 2024
-        else:
-            current_year = today_year
-        selected_year = st.sidebar.selectbox("년도 선택", list(range(2014, 2025)), index=list(range(2014, 2025)).index(current_year))
 
+        selected_year, selected_month = get_sidebar_filters()
         df = get_inven_plan(selected_year)
         if df is not None:
             st.subheader(f"{selected_year}년도 매입 실적")

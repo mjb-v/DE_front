@@ -10,6 +10,7 @@ import requests
 from datetime import datetime
 import os
 from dotenv import load_dotenv
+from utils import get_sidebar_filters
 
 font_path = 'NanumGothic-Regular.ttf'
 font_manager.fontManager.addfont(font_path)
@@ -160,8 +161,7 @@ def page3_view():
         st.subheader("연도별 효율 현황")
         st.sidebar.markdown("<div class='sidebar-section sidebar-subtitle'>필터 설정</div>", unsafe_allow_html=True)
 
-        current_year = datetime.today().year
-        selected_year = st.sidebar.selectbox("연도 선택", list(range(2014, 2025)), index=list(range(2014, 2025)).index(current_year))
+        selected_year = get_sidebar_filters(show_month=False)
 
         df2 = get_efficiency_status(selected_year)
         if df2 is not None and not df2.empty:
