@@ -271,7 +271,13 @@ def prediction_view():
 
         st.markdown("<hr style='border:1px solid #E0E0E0; margin: 2px 0 25px 0;'>", unsafe_allow_html=True)
         st.sidebar.markdown("<div class='sidebar-section sidebar-subtitle'>필터 설정</div>", unsafe_allow_html=True)
-        current_year = datetime.today().year
+        today_year = datetime.today().year
+        if today_year > 2024:
+            current_year = 2024
+        else:
+            current_year = today_year
+
+        # 이제 current_year는 안전하게 2024로 고정됩니다.
         selected_year = st.sidebar.selectbox("년도 선택", list(range(2014, 2025)), index=list(range(2014, 2025)).index(current_year))
 
         df = get_inven_plan(selected_year)
