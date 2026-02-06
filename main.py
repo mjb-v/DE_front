@@ -84,7 +84,7 @@ selected_company = st.sidebar.selectbox(" ", list(companies.keys()))
 company_info = companies[selected_company]
 
 # 로고와 상태 표시
-st.sidebar.image(company_info['logo'], width=150, use_column_width=True, caption=None, output_format='auto')
+st.sidebar.image(company_info['logo'], width=150, use_container_width=True, caption=None, output_format='auto')
 st.sidebar.markdown(f"<div class='sidebar-company-status'>상태: {company_info['connected']}</div>", unsafe_allow_html=True)
 
 # 구분선 추가

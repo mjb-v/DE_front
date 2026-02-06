@@ -153,7 +153,13 @@ def page1_view():
 
         current_year = datetime.today().year
         current_month = datetime.today().month
-        selected_year = st.sidebar.selectbox("연도 선택", list(range(2014, 2025)), index=list(range(2014, 2025)).index(current_year))
+
+        if current_year > 2024:
+            default_year = 2024
+        else:
+            default_year = current_year
+
+        selected_year = st.sidebar.selectbox("연도 선택", list(range(2014, 2025)), index=list(range(2014, 2025)).index(default_year))
         selected_month = st.sidebar.selectbox("월 선택", list(range(1, 13)), index=list(range(1, 13)).index(current_month))
 
         df = get_all_plan(selected_year)
