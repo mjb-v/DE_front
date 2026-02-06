@@ -24,9 +24,7 @@ rc('font', family='NanumGothic')
 
 # 선택할 수 있는 회사 리스트 샘플
 companies = {
-    "뉴텍SDS": {"logo": "images/newtech_logo.png", "connected": "연결됨"},
-    "Company A": {"logo": "images/logo_a.jpg", "connected": "연결됨"},
-    "Company B": {"logo": "images/logo_b.jpg", "connected": "연결됨"}
+    "뉴텍SDS": {"logo": "images/newtech_logo.png", "connected": "연결됨"}
 }
 
 # 사이드바 커스텀 스타일

@@ -169,7 +169,7 @@ def prediction_view():
                 </style>
                 <div class="custom-bold-text">예측 방법:</div>""", unsafe_allow_html=True)
         with col3:
-            method = st.selectbox(" ", ["지수평활법", "이동평균법", "ARIMA"], index=0)
+            method = st.selectbox(" ", ["ARIMA", "지수평활법", "이동평균법"], index=0)
 
         st.markdown("<hr style='border:1px solid #E0E0E0; margin: 2px 0 25px 0;'>", unsafe_allow_html=True)
         st.sidebar.markdown("<div class='sidebar-section sidebar-subtitle'>필터 설정</div>", unsafe_allow_html=True)
@@ -224,6 +224,10 @@ def prediction_view():
 
             # 예측 데이터 그래프
             pred_df_with_last_value = pred_df.copy()
+
+            if df_existing.empty:
+                st.warning("선택하신 기간/조건에 맞는 데이터가 없습니다.")
+                return
             last_value = df_existing.iloc[0, -1]
             pred_df_with_last_value.insert(0, df_existing.columns[-1], last_value)
 
@@ -267,7 +271,7 @@ def prediction_view():
                 </style>
                 <div class="custom-bold-text">예측 방법:</div>""", unsafe_allow_html=True)
         with col3:
-            method = st.selectbox(" ", ["지수평활법", "이동평균법", "ARIMA"], index=0)
+            method = st.selectbox(" ", ["ARIMA", "지수평활법", "이동평균법"], index=0)
 
         st.markdown("<hr style='border:1px solid #E0E0E0; margin: 2px 0 25px 0;'>", unsafe_allow_html=True)
         st.sidebar.markdown("<div class='sidebar-section sidebar-subtitle'>필터 설정</div>", unsafe_allow_html=True)
