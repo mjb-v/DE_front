@@ -9,24 +9,22 @@ def get_sidebar_filters(show_month=True):
     now = datetime.datetime.now()
     current_year = now.year
 
-    if current_year > 2024:
-        default_year = 2024
-        default_month = 11
-    else:
-        default_year = current_year
-        default_month = now.month
+    default_year = current_year
+    default_month = now.month
+
+    year_list = list(range(2014, current_year + 1))
 
     selected_year = st.sidebar.selectbox(
         "연도 선택", 
-        list(range(2014, 2025)), 
-        index=list(range(2014, 2025)).index(default_year)
+        year_list, 
+        index=year_list.index(default_year)
     )
 
     if show_month:
         selected_month = st.sidebar.selectbox(
             "월 선택", 
             list(range(1, 13)), 
-            index=list(range(1, 13)).index(default_month)
+            index=default_month - 1
         )
         return selected_year, selected_month
     else:

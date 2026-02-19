@@ -5,9 +5,9 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-import time
 import requests
-from datetime import datetime
+from datetime import datetime, timedelta
+import re
 import os
 from dotenv import load_dotenv
 from utils import get_sidebar_filters
@@ -36,18 +36,16 @@ def translate_data(data):
         "operating_time": "가동시간",
         "non_operating_time": "비가동시간",
         "target_quantity": "목표수량",
-        "produced_quantity": "생산수량", # 여기까지 실시간 가동현황
-        "production_efficiency": "생산효율", # 라인별 생산 효율 (생산수/목표수 * 100)
-        "line_efficiency": "라인가동율", # 라인별 가동시간 대비 생산량 (생산수/가동시간)
-        # 라인비가동율(비가동 시간이 많은 라인): 가동시간 / (가동시간 + 비가동시간) * 100
+        "produced_quantity": "생산수량", 
+        "production_efficiency": "생산효율", 
+        "line_efficiency": "라인가동율", 
         "monthly_production_efficiency": "월별생산효율",
         "monthly_line_efficiency": "월별라인가동율"
     }
     return pd.DataFrame(data).rename(columns=translation_dict)
 
 # 1. GET 실시간 가동 현황 데이터
-def get_real_time_status(date='2024-09-27'):
-    # 실시간을 위해 오늘 날짜로 설정
+def get_real_time_status(date=None):
     if date is None:
         date = datetime.today().strftime('%Y-%m-%d')
     else:
@@ -58,11 +56,13 @@ def get_real_time_status(date='2024-09-27'):
         data = response.json()
         return translate_data(data)
     else:
-        st.error("실시간 가동 현황 데이터를 가져오는 데 실패했습니다.")
         return pd.DataFrame()
 
 # 2. GET 연도별 효율 현황 데이터
-def get_efficiency_status(year=2024):
+def get_efficiency_status(year=None):
+    if year is None:
+        year = datetime.today().year
+
     response = requests.get(f"{API_URL}/productions/efficiency/{year}")
     if response.status_code == 200:
         data = response.json()
@@ -71,41 +71,22 @@ def get_efficiency_status(year=2024):
         st.error("효율 현황 데이터를 가져오는 데 실패했습니다.")
         return pd.DataFrame()
 
-# '라인'별 '생산효율'과 '라인가동율'의 평균 계산
-def calculate_average_by_line(df):
-    df_grouped = df.groupby('라인', observed=False).agg({
-        '생산효율': 'mean',
-        '라인가동율': 'mean'
-    }).reset_index()
-    return df_grouped
+# 3. 최근 가동일 감지
+def get_latest_date():
+    today = datetime.today()
+    start_date = today - timedelta(days=30)
+    try:
+        res = requests.get(f"{API_URL}/productions/days/?start_date={start_date.strftime('%Y-%m-%d')}&end_date={today.strftime('%Y-%m-%d')}")
+        if res.status_code == 200 and res.json():
+            df_temp = pd.DataFrame(res.json())
+            if not df_temp.empty:
+                latest = pd.to_datetime(df_temp['date']).max().date()
+                return latest
+    except:
+        pass
+    return today - timedelta(days=1)
 
-# 1. 실시간 그래프
-def plot1(df):
-    df_grouped = calculate_average_by_line(df)
-    df_grouped['라인'] = pd.Categorical(df_grouped['라인'], categories=[f"Line{i}" for i in range(1, 11)], ordered=True)
-    df_grouped = df_grouped.sort_values('라인')
-
-    fig, ax = plt.subplots(figsize=(10, 6))
-
-    lines = df_grouped['라인']
-    bar_width = 0.35
-    index = np.arange(len(lines))
-
-    ax.clear()
-    
-    bar1 = ax.bar(index, df_grouped['생산효율'], bar_width, label='생산효율', color='b', alpha=0.6)
-    bar2 = ax.bar(index + bar_width, df_grouped['라인가동율'], bar_width, label='라인가동율', color='r', alpha=0.6)
-
-    ax.set_xlabel('라인', fontsize=12)
-    ax.set_ylabel('퍼센트 (%)', fontsize=12)
-    ax.set_title('라인별 평균 생산효율과 라인가동율 (실시간)', fontsize=14)
-    ax.set_xticks(index + bar_width / 2)
-    ax.set_xticklabels(lines, rotation=45)
-
-    ax.legend()
-    return fig
-
-# 2. 전체 현황 그래프
+# 4. 연도별 현황 그래프
 def plot2(df, selected_year):
     fig, ax = plt.subplots(figsize=(10, 6))
     
@@ -124,6 +105,13 @@ def plot2(df, selected_year):
 
     ax.legend()
     st.pyplot(fig)
+
+def get_num(text):
+    nums = re.findall(r'\d+', str(text))
+    return int(nums[0]) if nums else 999    
+def get_prefix(text):
+    return re.sub(r'\d+.*', '', str(text)).strip()
+
 # ----------------------------------------------------------------
 def page3_view():
     st.markdown("<h2 style='text-align: left;'>📅 생산 현황 관리</h2>", unsafe_allow_html=True)
@@ -133,25 +121,41 @@ def page3_view():
 
     if tab == "실시간 가동 현황":
         st.subheader("실시간 가동 현황")
-        table_placeholder = st.empty()
-        chart_placeholder = st.empty()
 
+        latest_date = get_latest_date()
+        selected_date = st.sidebar.date_input("조회 일자 선택", value=latest_date)
+        
         try:
-            df1 = get_real_time_status()
-            
-            if df1 is not None and not df1.empty:
-                df1 = df1.drop(columns=['production_idx', 'account_idx'], errors='ignore')[  # KeyError 방지를 위해 errors='ignore' 사용
-                    ["가동일자", "공정", "라인", "작업자", "근무조", "품번", "품명", "규격", "가동시간", "생산수량", "생산효율", "라인가동율"]
-                ]
-                df1['라인'] = pd.Categorical(df1['라인'], categories=[f"Line{i}" for i in range(1, 11)], ordered=True)
-                table_placeholder.dataframe(df1)
+            formatted_date = selected_date.strftime('%Y-%m-%d')
+            df1 = get_real_time_status(formatted_date)
 
-                # 그래프
-                fig = plot1(df1)
-                chart_placeholder.pyplot(fig)
+            if df1 is not None and not df1.empty:
+                df1_display = df1.drop(columns=['production_idx', 'account_idx'], errors='ignore')
+                st.dataframe(df1_display)
+
+                st.markdown("### 라인별 생산 효율")
+                df_graph = df1_display[['라인', '생산효율']].copy()
+                df_graph['생산효율'] = pd.to_numeric(df_graph['생산효율'], errors='coerce').fillna(0)
+                df_grouped = df_graph.groupby('라인').mean().reset_index()     
+                df_grouped['prefix'] = df_grouped['라인'].apply(get_prefix)
+                df_grouped['num'] = df_grouped['라인'].apply(get_num)
+                df_grouped = df_grouped.sort_values(by=['prefix', 'num'])
+
+                fig, ax = plt.subplots(figsize=(10, 5))
+                lines = df_grouped['라인'].tolist()
+                prod_eff = df_grouped['생산효율'].tolist()
+
+                ax.plot(lines, prod_eff, marker='o', linestyle='-', color='#66b3ff', linewidth=2.5, markersize=8, label='생산효율')
+                ax.set_xticks(range(len(lines)))
+                ax.set_xticklabels(lines, rotation=0) 
+                ax.set_ylim(0, 100)
+                ax.set_ylabel('생산효율 (%)', fontsize=12)
+                ax.grid(axis='y', linestyle='--', alpha=0.7)
+                ax.legend()
+                st.pyplot(fig)
+
             else:
-                today = datetime.today().strftime('%Y-%m-%d')
-                st.warning(f"오늘 날짜 ({today}) 에 대한 데이터가 없습니다.")
+                st.warning(f"선택하신 날짜 ({formatted_date}) 에 대한 데이터가 없습니다.")
 
         except Exception as e:
             st.error("오류가 발생했습니다.")
@@ -165,7 +169,7 @@ def page3_view():
 
         df2 = get_efficiency_status(selected_year)
         if df2 is not None and not df2.empty:
-            df2 = df2.drop(columns=["year"])
+            df2 = df2.drop(columns=["year"], errors='ignore')
             df2_pivot = df2.set_index('월').T
             df2_pivot.columns = [f"{month}월" for month in df2_pivot.columns]
             st.markdown("""
@@ -176,6 +180,7 @@ def page3_view():
                 </style>
                 """, unsafe_allow_html=True)
             st.dataframe(df2_pivot.style.set_properties(**{'width': '10px'}))
+
             plot2(df2, selected_year)
         else:
-            st.warning(f"{selected_year}년도에 대한 데이터가 없습니다.")       
+            st.warning(f"{selected_year}년도에 대한 데이터가 없습니다.")

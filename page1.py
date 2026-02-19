@@ -115,7 +115,7 @@ def delete_production_plan(plan_id):
         st.error("생산 계획 삭제에 실패했습니다.")
 
 # 2. 생산계획 입력 필드
-def production_plan_form(year=2024, month=10, item_number="", item_name="", model="가전", price=0, inventory=0, process="사출", form_key=""):
+def production_plan_form(year=None, month=None, item_number="", item_name="", model="가전", price=0, inventory=0, process="사출", form_key=""):
     model_options = ["가전", "건조기", "세탁기", "식기세척기", "에어컨", "중장비", "포장박스", "LX2PE", "GEN3.5", "MX5"]
     process_options = ["사출", "검사/조립"]
 
@@ -160,7 +160,7 @@ def page1_view():
         row_order = ["사업계획", "사업실적", "사업달성율", "생산계획", "생산실적", "생산달성율"]
         df1 = df1.reindex(row_order)
         st.subheader(f"{selected_year}년도 계획 및 실적 데이터")
-        st.dataframe(df1)
+        st.dataframe(df1.style.format("{:,.0f}"))
 
         df2 = get_monthly_plan(selected_year, selected_month)
         if df2.empty:
@@ -168,31 +168,46 @@ def page1_view():
         else:
             st.subheader(f"{selected_year}년 {selected_month}월")
             df2 = df2.drop(columns=['연도','월'])
-            st.dataframe(df2)
+            st.dataframe(df2.style.format(thousands=","))
 
         # 그래프
-        business_achievement_rates = df["사업달성율"]
-        production_achievement_rates = df["생산달성율"]
-        months = df["월"].apply(lambda x: f"{x}월")
-        fig, ax = plt.subplots(figsize=(8, 6))
+        st.markdown("---")
+        st.markdown("### 월별 사업 및 생산 달성률 추이")
+        df_chart = df.copy()
+        df_chart['월_숫자'] = pd.to_numeric(df_chart['월'], errors='coerce').fillna(0).astype(int)
 
-        # 막대그래프에 월별 데이터 추가
-        ax.bar(months, business_achievement_rates, width=0.4, label='사업 달성률', align='center', color='#ff9999')
-        ax.bar(months, production_achievement_rates, width=0.4, label='생산 달성률', align='edge', color='#66b3ff')
+        df_chart = df_chart.sort_values('월_숫자')
 
-        # 그래프에 텍스트와 제목 추가
+        months = df_chart['월_숫자'].apply(lambda x: f"{x}월").tolist()
+        business_rates = pd.to_numeric(df_chart['사업달성율'], errors='coerce').fillna(0).tolist()
+        production_rates = pd.to_numeric(df_chart['생산달성율'], errors='coerce').fillna(0).tolist()
+
+        if sum(business_rates) == 0 and sum(production_rates) == 0:
+            st.info("📌 현재 시스템에 등록된 계획 수량이 없어 달성률이 0%로 표시됩니다.")
+            
+        fig, ax = plt.subplots(figsize=(10, 5))
+        x = range(len(months))
+        width = 0.35
+        
+        ax.bar([i - width/2 for i in x], business_rates, width=width, label='사업 달성률', color='#ff9999')
+        ax.bar([i + width/2 for i in x], production_rates, width=width, label='생산 달성률', color='#66b3ff')
+        
+        ax.set_xticks(x)
+        ax.set_xticklabels(months, rotation=0)
+        
         ax.set_ylim(0, 100)
         ax.set_ylabel('달성률 (%)')
-        ax.set_title(f"{selected_year}년 월별 사업 및 생산 달성률")
         ax.legend()
+        
         st.pyplot(fig)
 
     # 2. 생산 계획 등록/수정 페이지
     elif tab == "생산 계획 등록/수정":
         df = get_plan_register()
         if not df.empty:
+            df = df.sort_values(by='날짜', ascending=False).reset_index(drop=True)
             df_display = df.drop(columns=["plan_idx"])[['날짜', '품번', '품명', '모델', '단가', '생산계획', '공정']]
-            st.dataframe(df_display)
+            st.dataframe(df_display.style.format({"단가": "{:,.0f}", "생산계획": "{:,.0f}"}))
 
         # 수정/삭제할 행 선택 및 버튼 배치
         st.subheader("수정/삭제")
