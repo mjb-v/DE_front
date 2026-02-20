@@ -145,13 +145,17 @@ def page3_view():
                 lines = df_grouped['라인'].tolist()
                 prod_eff = df_grouped['생산효율'].tolist()
 
-                ax.plot(lines, prod_eff, marker='o', linestyle='-', color='#66b3ff', linewidth=2.5, markersize=8, label='생산효율')
+                bars = ax.bar(lines, prod_eff, color='#66b3ff', alpha=0.8, edgecolor='navy', linewidth=1)
+                for bar in bars:
+                    height = bar.get_height()
+                    ax.text(bar.get_x() + bar.get_width()/2., height + 1,
+                            f'{height:.1f}%', ha='center', va='bottom', fontsize=10)
                 ax.set_xticks(range(len(lines)))
                 ax.set_xticklabels(lines, rotation=0) 
-                ax.set_ylim(0, 100)
+                ax.set_ylim(0, 110)
                 ax.set_ylabel('생산효율 (%)', fontsize=12)
-                ax.grid(axis='y', linestyle='--', alpha=0.7)
-                ax.legend()
+                ax.set_title(f"{formatted_date} 라인별 평균 생산효율", fontsize=14, pad=15)
+                ax.grid(axis='y', linestyle='--', alpha=0.5)
                 st.pyplot(fig)
 
             else:
