@@ -90,12 +90,19 @@ def material_inout_plan_form(selected_date=None, statement_number="", client="",
 def go_to_page(page_name):
     st.session_state.page = page_name
 
+# ---------------------------------------------------------------------------------------------------------
 # 메인 페이지
 def main_page():
     st.markdown("<h2 style='text-align: left;'>📥 자재 입고 관리</h2>", unsafe_allow_html=True)
     st.markdown("<hr style='border:1px solid #E0E0E0; margin: 2px 0 25px 0;'>", unsafe_allow_html=True)
 
     df = get_material_inventory_data()
+    if df is not None and not df.empty:
+        df['날짜'] = pd.to_datetime(df['날짜'])
+        today = pd.Timestamp(datetime.today().date())
+        df.loc[df['날짜'] > today, '날짜'] = today
+        df = df.sort_values(by='날짜', ascending=False)
+        df['날짜'] = df['날짜'].dt.strftime('%Y-%m-%d')
     df_display = df.drop(columns=["materialinout_idx", "account_idx"])
     st.dataframe(df_display)
 

@@ -133,7 +133,7 @@ def page3_view():
                 df1_display = df1.drop(columns=['production_idx', 'account_idx'], errors='ignore')
                 st.dataframe(df1_display)
 
-                st.markdown("### 라인별 생산 효율")
+                st.markdown("### ")
                 df_graph = df1_display[['라인', '생산효율']].copy()
                 df_graph['생산효율'] = pd.to_numeric(df_graph['생산효율'], errors='coerce').fillna(0)
                 df_grouped = df_graph.groupby('라인').mean().reset_index()     
