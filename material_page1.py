@@ -49,16 +49,20 @@ def get_all_plan(year: int):
     response = requests.get(f"{API_URL}/material/rate/{year}")
     if response.status_code == 200:
         data = response.json()
+        if not data:
+            return pd.DataFrame(), pd.DataFrame() 
         df = translate_data(data)
         df = df.drop(columns=["연도"])
         df_pivot = df.set_index('월').T
         df_pivot.columns = [f"{month}월" for month in df_pivot.columns]
+        all_months = [f"{m}월" for m in range(1, 13)]
+        df_pivot = df_pivot.reindex(columns=all_months, fill_value=0)
         row_order = ["사업계획", "사업실적", "사업달성율"]
-        df_pivot = df_pivot.reindex(row_order)
+        df_pivot = df_pivot.reindex(row_order, fill_value=0)
         return df, df_pivot
     else:
         st.error("데이터를 불러오는 데 실패했습니다.")
-        return None
+        return pd.DataFrame(), pd.DataFrame()
 
 # 1-2. 아래 - 당월 플랜
 def get_material_all_plan(year: int, month: int):
@@ -80,7 +84,10 @@ def get_plan_register():
     response = requests.get(f"{API_URL}/materials/all/")
     if response.status_code == 200:
         data = response.json()
-        return translate_data(data)
+        df = translate_data(data)
+        if not df.empty and "날짜" in df.columns:
+            df = df.sort_values(by="날짜", ascending=False).reset_index(drop=True)
+        return df
     else:
         st.error("전체 자재관리 계획 리스트를 가져오는 데 실패했습니다.")
         return pd.DataFrame()
