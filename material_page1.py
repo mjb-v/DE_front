@@ -149,7 +149,7 @@ def material_page1_view():
         selected_year, selected_month = get_sidebar_filters()
         df, df1 = get_all_plan(selected_year)
         st.subheader(f"{selected_year}년도 계획 및 실적 데이터")
-        st.dataframe(df1)
+        st.dataframe(df1.style.format("{:,.0f}"))
 
         df2 = get_material_all_plan(selected_year, selected_month)
         if df2.empty:
