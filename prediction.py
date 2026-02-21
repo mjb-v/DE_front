@@ -221,7 +221,7 @@ def mass_production_view():
                 response = requests.post(f"{API_URL}/predictions/mass_production", json=user_input_data)
                 if response.status_code == 200:
                     result = response.json()
-                    
+                    comments = result.get("analysis_comments", {})
                     tab1, tab2, tab3 = st.tabs(["주문량 예측", "리드타임 예측", "안전재고 예측"])
                     
                     with tab1:
@@ -229,18 +229,24 @@ def mass_production_view():
                         df_order_pred = pd.DataFrame([result["order_volume"]["prediction"]])
                         fig1 = draw_prediction_chart(df_order_hist, df_order_pred, "주문량 추이 및 예측", "주문 수량(개)", '#007BFF', '#20B2AA')
                         st.plotly_chart(fig1, use_container_width=True)
+                        st.markdown("#### 📋 주문량 분석 리포트")
+                        st.info(comments.get("order", "분석 결과가 없습니다."))
 
                     with tab2:
                         df_lead_hist = pd.DataFrame([result["lead_time"]["history"]])
                         df_lead_pred = pd.DataFrame([result["lead_time"]["prediction"]])
                         fig2 = draw_prediction_chart(df_lead_hist, df_lead_pred, "리드타임 변동 및 예측", "리드타임(일)", '#FF8C00', '#FFD700')
                         st.plotly_chart(fig2, use_container_width=True)
+                        st.markdown("#### 📋 리드타임 분석 리포트")
+                        st.info(comments.get("lead", "분석 결과가 없습니다."))
 
                     with tab3:
                         df_safe_hist = pd.DataFrame([result["safety_stock"]["history"]])
                         df_safe_pred = pd.DataFrame([result["safety_stock"]["prediction"]])
                         fig3 = draw_prediction_chart(df_safe_hist, df_safe_pred, "안전재고 산출 및 예측", "안전재고 수량(개)", '#8A2BE2', '#FF69B4')
                         st.plotly_chart(fig3, use_container_width=True)
+                        st.markdown("#### 📋 안전재고 분석 리포트")
+                        st.info(comments.get("safety", "분석 결과가 없습니다."))
                 else:
                     st.error(f"분석 서버 오류 발생: HTTP {response.status_code}")
                     
@@ -251,8 +257,10 @@ def mass_production_view():
 
 
 def prediction_view():
-    st.sidebar.markdown("<div class='sidebar-section sidebar-subtitle'>단계 선택</div>", unsafe_allow_html=True)
-    menu_selection = st.sidebar.radio(" ", ["양산 단계", "아이디어 단계", "시제품 단계"])
+    menu_selection = st.sidebar.radio(
+        "<div class='sidebar-section sidebar-subtitle'>단계 선택</div>", 
+        ["양산 단계", "아이디어 단계", "시제품 단계"]
+    )
     
     if menu_selection == "양산 단계":
         mass_production_view()
