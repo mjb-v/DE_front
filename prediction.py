@@ -175,7 +175,7 @@ def mass_production_view():
 
     # 중앙: 입력 필드
     with st.form("prediction_form"):
-        st.markdown("#### 📝 분석 입력 필드")
+        st.markdown("#### 📝 분석 입력")
         
         c1, c2, c3 = st.columns(3)
         with c1:
@@ -257,9 +257,14 @@ def mass_production_view():
 
 
 def prediction_view():
+    st.sidebar.markdown(
+        "<div class='sidebar-section sidebar-subtitle' style='text-align: left; margin-bottom: 0px;'>단계 선택</div>", 
+        unsafe_allow_html=True
+    )
     menu_selection = st.sidebar.radio(
-        "<div class='sidebar-section sidebar-subtitle'>단계 선택</div>", 
-        ["양산 단계", "아이디어 단계", "시제품 단계"]
+        "hidden_label", 
+        ["양산 단계", "아이디어 단계", "시제품 단계"],
+        label_visibility="collapsed"
     )
     
     if menu_selection == "양산 단계":
