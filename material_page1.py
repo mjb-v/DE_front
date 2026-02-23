@@ -1,5 +1,4 @@
-# 자재관리 1. 자재계획관리
-
+import plotly.graph_objects as go
 from matplotlib import font_manager, rc
 import streamlit as st
 import pandas as pd
@@ -16,11 +15,9 @@ font_path = 'NanumGothic-Regular.ttf'
 font_manager.fontManager.addfont(font_path)
 rc('font', family='NanumGothic')
 
-# FastAPI URL
 load_dotenv()
 API_URL = os.getenv("API_URL")
 
-# 한글 컬럼명으로 변환
 def translate_data(data):
     translation_dict = {
         "year": "연도",
@@ -159,43 +156,142 @@ def material_page1_view():
             df2 = df2.drop(columns=['연도','월'])
             st.dataframe(df2)
 
-        # 그래프 --> 거래처 선택 & 해당 년도의 증감율만 보여주기
-        business_achievement_rates = df["사업달성율"]
-        months = df["월"].apply(lambda x: f"{x}월")
-        fig, ax = plt.subplots(figsize=(8, 6))
-        ax.bar(months, business_achievement_rates, width=0.4, label='사업 달성률', align='center', color='#ff9999')
-        ax.set_ylim(0, 100)
-        ax.set_ylabel('달성률 (%)')
-        ax.set_title(f"{selected_year}년 월별 사업 달성률")
-        ax.legend()
-        st.pyplot(fig)
+        # 그래프
+        st.markdown("---")
+        
+        df_chart = df.copy()
+        df_chart['월_숫자'] = pd.to_numeric(df_chart['월'], errors='coerce').fillna(0).astype(int)
+        df_chart = df_chart.sort_values('월_숫자')
+        
+        months = df_chart['월_숫자'].apply(lambda x: f"{x}월").tolist()
+        business_rates = pd.to_numeric(df_chart['사업달성율'], errors='coerce').fillna(0).tolist()
+        
+        if sum(business_rates) == 0:
+            st.info("📌 현재 시스템에 등록된 계획 수량이 없어 달성률이 0%로 표시됩니다.")
+            
+        fig = go.Figure()
+        fig.add_trace(go.Bar(
+            x=months, 
+            y=business_rates,
+            name='사업 달성율',
+            marker_color='#FF9999',
+            text=[f"{val:.1f}%" for val in business_rates],
+            textposition='outside'
+        ))
+
+        max_val = max(business_rates) if business_rates else 0
+        fig.update_layout(
+            title=f"📈 {selected_year}년 월별 사업 달성률 추이",
+            title_font_size=20,
+            xaxis_title="월",
+            yaxis_title="달성률 (%)",
+            yaxis=dict(range=[0, max_val + 15]), 
+            plot_bgcolor='rgba(0,0,0,0)',
+            margin=dict(t=50, b=20, l=20, r=20),
+            legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
+        )
+
+        st.plotly_chart(fig, use_container_width=True)
 
     elif tab == "자재 계획 등록/수정":
-        # 전체 데이터 가져오기 및 테이블 표시
         df = get_plan_register()
         if not df.empty:
-            df_display = df.drop(columns=["material_idx", "account_idx"])
-            st.dataframe(df_display)
+            df = df.sort_values(by="날짜", ascending=False).reset_index(drop=True)
+            
+            # -------------------------------------------------------------
+            # 🔍 검색/조회
+            # -------------------------------------------------------------
+            st.markdown(
+                """
+                <style>
+                .search-box {
+                    background-color: #f8f9fa;
+                    padding: 20px;
+                    border-radius: 5px;
+                    border: 1px solid #e0e0e0;
+                    margin-bottom: 20px;
+                }
+                </style>
+                <div class="search-box">
+                    <h4 style="margin-top:0px; color:#333;">🔍 자재 계획 세부 검색</h4>
+                </div>
+                """, unsafe_allow_html=True
+            )
 
-        # 수정/삭제할 행 선택 및 버튼 배치
+            date_options = ["전체"] + sorted(list(df['날짜'].dropna().unique()), reverse=True)
+            category_options = ["전체"] + sorted(list(df['품목구분'].dropna().unique()))
+            model_options = ["전체"] + sorted(list(df['모델구분'].dropna().unique()))
+            client_options = ["전체"] + company_names 
+
+            with st.form("material_search_form"):
+                col1, col2, col3 = st.columns(3)
+                with col1:
+                    search_date = st.selectbox("등록일자", options=date_options)
+                    search_category = st.selectbox("품목구분", options=category_options)
+                with col2:
+                    search_client = st.selectbox("거래처명", options=client_options)
+                    search_model = st.selectbox("모델구분", options=model_options)
+                with col3:
+                    search_item_no = st.text_input("품번 검색", placeholder="예: 11")
+                    search_item_name = st.text_input("품명 검색", placeholder="예: 세탁기")
+
+                submit_btn = st.form_submit_button("조회하기", use_container_width=True)
+
+            # -------------------------------------------------------------
+            # ⚙️ 필터 적용
+            # -------------------------------------------------------------
+            filtered_df = df.copy()
+            
+            if search_date != "전체":
+                filtered_df = filtered_df[filtered_df['날짜'] == search_date]
+            if search_client != "전체":
+                filtered_df = filtered_df[filtered_df['거래처명'] == search_client]
+            if search_category != "전체":
+                filtered_df = filtered_df[filtered_df['품목구분'] == search_category]
+            if search_model != "전체":
+                filtered_df = filtered_df[filtered_df['모델구분'] == search_model]
+            if search_item_no:
+                filtered_df = filtered_df[filtered_df['품번'].astype(str).str.contains(search_item_no, na=False, case=False)]
+            if search_item_name:
+                filtered_df = filtered_df[filtered_df['품명'].astype(str).str.contains(search_item_name, na=False, case=False)]
+
+            # -------------------------------------------------------------
+            # 📊 테이블
+            # -------------------------------------------------------------
+            st.markdown(f"총 **{len(filtered_df)}**건의 자재 계획이 검색되었습니다.")
+            
+            if not filtered_df.empty:
+                df_display = filtered_df.drop(columns=["material_idx", "account_idx"], errors="ignore")
+                numeric_cols = df_display.select_dtypes(include=['number']).columns
+                format_dict = {col: "{:,.0f}" for col in numeric_cols}
+                st.dataframe(df_display.style.format(format_dict), use_container_width=True)
+            else:
+                st.info("검색 조건에 맞는 데이터가 없습니다.")
+
+        # -------------------------------------------------------------
+        # 수정/삭제
+        # -------------------------------------------------------------
         st.subheader("수정/삭제")
         col1, col2 = st.columns([2, 1])
 
         with col1:
-            selected_index = st.selectbox("수정/삭제할 줄의 번호 선택", df.index, key="select_index")
+            if not filtered_df.empty:
+                selected_index = st.selectbox("수정/삭제할 줄의 번호 선택", filtered_df.index, key="select_index")
+            else:
+                st.info("검색 결과가 없어 선택할 항목이 없습니다.")
+                selected_index = None
             
         with col2:
-            selected_row = df.loc[selected_index]
-            material_id = selected_row["material_idx"]
+            if selected_index is not None:
+                selected_row = df.loc[selected_index]
+                material_id = selected_row["material_idx"]
 
-            # 수정 버튼
-            if st.button("수정", key="edit_button"):
-                st.session_state['is_editing'] = True
+                if st.button("수정", key="edit_button"):
+                    st.session_state['is_editing'] = True
 
-            # 삭제 버튼
-            if st.button("삭제", key="delete_button"):
-                delete_material_plan(material_id)
-                st.rerun()
+                if st.button("삭제", key="delete_button"):
+                    delete_material_plan(material_id)
+                    st.rerun()
 
         # 수정할 행이 선택된 경우에만 필드 생성
         if st.session_state.get('is_editing', False):  

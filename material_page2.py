@@ -1,4 +1,3 @@
-# 자재관리 2. 자재입고관리
 from matplotlib import font_manager, rc
 import streamlit as st
 import pandas as pd
@@ -13,7 +12,6 @@ font_path = 'NanumGothic-Regular.ttf'
 font_manager.fontManager.addfont(font_path)
 rc('font', family='NanumGothic')
 
-# FastAPI URL
 load_dotenv()
 API_URL = os.getenv("API_URL")
 
@@ -97,32 +95,106 @@ def main_page():
     st.markdown("<hr style='border:1px solid #E0E0E0; margin: 2px 0 25px 0;'>", unsafe_allow_html=True)
 
     df = get_material_inventory_data()
+
     if df is not None and not df.empty:
         df['날짜'] = pd.to_datetime(df['날짜'])
         today = pd.Timestamp(datetime.today().date())
         df.loc[df['날짜'] > today, '날짜'] = today
         df = df.sort_values(by='날짜', ascending=False)
+        df['연도'] = df['날짜'].dt.year
+        df['월'] = df['날짜'].dt.month
         df['날짜'] = df['날짜'].dt.strftime('%Y-%m-%d')
-    df_display = df.drop(columns=["materialinout_idx", "account_idx"])
-    st.dataframe(df_display)
+        
+        # -------------------------------------------------------------
+        # 🔍 검색/조회
+        # -------------------------------------------------------------
+        st.markdown(
+            """
+            <style>
+            .search-box {
+                background-color: #f8f9fa;
+                padding: 20px;
+                border-radius: 5px;
+                border: 1px solid #e0e0e0;
+                margin-bottom: 20px;
+            }
+            </style>
+            <div class="search-box">
+                <h4 style="margin-top:0px; color:#333;">🔍 입고 내역 검색</h4>
+            </div>
+            """, unsafe_allow_html=True
+        )
 
-    col1, col2 = st.columns([2, 1])
-    with col1:
-            selected_index = st.selectbox("수정/삭제할 줄의 번호 선택", df.index, key="select_index")
-    with col2:
-        selected_row = df.loc[selected_index]
-        material_id = selected_row["materialinout_idx"]
+        year_options = ["전체"] + sorted(list(df['연도'].unique()), reverse=True)
+        month_options = ["전체"] + list(range(1, 13))
+        client_options = ["전체"] + company_names
 
-        st.session_state.selected_row = selected_row
-        st.session_state.material_id = material_id
+        with st.form("material_inout_search_form"):
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                search_year = st.selectbox("조회 연도", options=year_options, index=1 if len(year_options) > 1 else 0)
+            with col2:
+                search_month = st.selectbox("조회 월", options=month_options)
+            with col3:
+                search_client = st.selectbox("거래처명", options=client_options)
 
-        st.button('수정', on_click=go_to_page, args=('edit',))
+            submit_btn = st.form_submit_button("조회하기", use_container_width=True)
 
-        if st.button("삭제", key="delete_button"):
-            delete_material_inventory_data(material_id)
-            st.rerun()
+        # -------------------------------------------------------------
+        # ⚙️ 필터 적용
+        # -------------------------------------------------------------
+        filtered_df = df.copy()
+        if search_year != "전체":
+            filtered_df = filtered_df[filtered_df['연도'] == search_year]
+        if search_month != "전체":
+            filtered_df = filtered_df[filtered_df['월'] == search_month]
+        if search_client != "전체":
+            filtered_df = filtered_df[filtered_df['거래처명'] == search_client]
+        filtered_df = filtered_df.drop(columns=["연도", "월", "materialinout_idx", "account_idx"], errors="ignore")
 
-    # 등록
+        # -------------------------------------------------------------
+        # 📊 테이블
+        # -------------------------------------------------------------
+        st.markdown(f"총 **{len(filtered_df)}**건의 자재 입고 내역이 검색되었습니다.")
+        
+        if not filtered_df.empty:
+            numeric_cols = filtered_df.select_dtypes(include=['number']).columns
+            format_dict = {col: "{:,.0f}" for col in numeric_cols}
+            st.dataframe(filtered_df.style.format(format_dict), use_container_width=True)
+        else:
+            st.info("검색 조건에 맞는 입고 내역이 없습니다.")
+            
+        # -------------------------------------------------------------
+        # 수정/삭제
+        # -------------------------------------------------------------
+        st.subheader("수정/삭제")
+        col1, col2 = st.columns([2, 1])
+        with col1:
+            if not filtered_df.empty:
+                selected_index = st.selectbox("수정/삭제할 줄의 번호 선택", filtered_df.index, key="select_index")
+            else:
+                st.info("검색 결과가 없어 선택할 항목이 없습니다.")
+                selected_index = None
+                
+        with col2:
+            if selected_index is not None:
+                selected_row = df.loc[selected_index]
+                material_id = selected_row["materialinout_idx"]
+
+                st.session_state.selected_row = selected_row
+                st.session_state.material_id = material_id
+                st.button('수정', on_click=go_to_page, args=('edit',))
+
+                if st.button("삭제", key="delete_button"):
+                    delete_material_inventory_data(material_id)
+                    st.rerun()
+                    
+    else:
+        st.info("현재 등록된 자재 입고 데이터가 없습니다.")
+
+    # -------------------------------------------------------------
+    # 등록 폼
+    # -------------------------------------------------------------
     st.markdown(
     """
     <style>
