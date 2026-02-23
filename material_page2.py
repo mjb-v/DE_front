@@ -120,7 +120,7 @@ def main_page():
             }
             </style>
             <div class="search-box">
-                <h4 style="margin-top:0px; color:#333;">🔍 입고 내역 검색</h4>
+                <h4 style="margin-top:0px; color:#333;">🔍 검색/조회</h4>
             </div>
             """, unsafe_allow_html=True
         )

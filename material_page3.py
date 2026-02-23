@@ -44,7 +44,7 @@ def material_page3_view():
         .search-box { background-color: #f8f9fa; padding: 20px; border-radius: 5px; border: 1px solid #e0e0e0; margin-bottom: 20px; }
         </style>
         <div class="search-box">
-            <h4 style="margin-top:0px; color:#333;">🔍 자재 재고 상세 검색</h4>
+            <h4 style="margin-top:0px; color:#333;">🔍 검색/조회</h4>
         </div>
         """, unsafe_allow_html=True
     )

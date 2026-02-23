@@ -65,7 +65,7 @@ def material_page4_view():
             }
             </style>
             <div class="search-box">
-                <h4 style="margin-top:0px; color:#333;">🔍 LOT 재고 상세 검색</h4>
+                <h4 style="margin-top:0px; color:#333;">🔍 검색/조회</h4>
             </div>
             """, unsafe_allow_html=True
         )
