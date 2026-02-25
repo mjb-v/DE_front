@@ -103,7 +103,7 @@ def page3_view():
         with st.form("facility_search_form"):
             col1, col2 = st.columns([1, 2])
             with col1:
-                selected_date = st.date_input("조회 일자 선택", value=datetime(2026, 2, 14))
+                selected_date = st.date_input("조회 일자 선택", value=datetime(2026, 2, 25))
             with col2:
                 st.text_input("라인 검색 (예: 사출1호기)", key="search_line", placeholder="검색할 라인명을 입력하세요 (비워두면 전체 조회)")
             submit_btn = st.form_submit_button("조회하기", use_container_width=True)

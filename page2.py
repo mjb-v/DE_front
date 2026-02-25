@@ -96,6 +96,7 @@ def page2_view():
         if not df.empty:
             selected_columns = ["날짜", "품번", "품명", "라인", "작업자", "모델", "생산수량", "생산효율", "가동시간", "설비효율"]
             df = df[selected_columns]
+            df = df.sort_values(by="날짜", ascending=False).reset_index(drop=True)
             st.session_state['df'] = df
         else:
             if submit_btn:
